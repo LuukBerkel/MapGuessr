@@ -5,27 +5,84 @@
     <ClCompile Include="tigl.cpp">
       <Filter>libraries</Filter>
     </ClCompile>
+    <ClCompile Include="renderController.cpp">
+      <Filter>graphics\management</Filter>
+    </ClCompile>
+    <ClCompile Include="tileManager.cpp">
+      <Filter>graphics\management</Filter>
+    </ClCompile>
+    <ClCompile Include="gameTile.cpp">
+      <Filter>graphics\logic</Filter>
+    </ClCompile>
+    <ClCompile Include="tileCreator.cpp">
+      <Filter>graphics\logic</Filter>
+    </ClCompile>
+    <ClCompile Include="gameCache.cpp">
+      <Filter>graphics\logic</Filter>
+    </ClCompile>
+    <ClCompile Include="objectComponent.cpp">
+      <Filter>graphics\components</Filter>
+    </ClCompile>
+    <ClCompile Include="floorComponent.cpp">
+      <Filter>graphics\components</Filter>
+    </ClCompile>
+    <ClCompile Include="playerComponent.cpp">
+      <Filter>graphics\components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="libraries">
       <UniqueIdentifier>{1ec98e5e-462c-43b0-9e28-778e40a3d8e1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="graphics">
-      <UniqueIdentifier>{2a46eef9-bcdd-4614-97d0-f371892f4376}</UniqueIdentifier>
-    </Filter>
     <Filter Include="map">
-      <UniqueIdentifier>{7a7547bf-91c8-49b6-ac76-8981fa2c3bb0}</UniqueIdentifier>
+      <UniqueIdentifier>{f2ffc1c2-ee19-401e-9b95-aa7fa3092a35}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphics">
+      <UniqueIdentifier>{f4bf4469-0af6-420a-8ee5-be39bcc357c3}</UniqueIdentifier>
     </Filter>
     <Filter Include="graphics\components">
-      <UniqueIdentifier>{f9011d10-78ab-4286-a0ec-19bd1be0bbdb}</UniqueIdentifier>
+      <UniqueIdentifier>{cfe838d2-d9f9-4284-b868-2f4790cf6559}</UniqueIdentifier>
     </Filter>
     <Filter Include="graphics\logic">
-      <UniqueIdentifier>{83c493cc-9cd7-4081-976e-6e28834b9d4e}</UniqueIdentifier>
+      <UniqueIdentifier>{136d6c97-fdc8-4b97-ab80-e24829d18ac4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphics\management">
+      <UniqueIdentifier>{ed6090a4-a1ea-4592-8e43-51562ee636bd}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="tigl.h">
       <Filter>libraries</Filter>
     </ClInclude>
+    <ClInclude Include="renderController.h">
+      <Filter>graphics\management</Filter>
+    </ClInclude>
+    <ClInclude Include="tileManager.h">
+      <Filter>graphics\management</Filter>
+    </ClInclude>
+    <ClInclude Include="gameTile.h">
+      <Filter>graphics\logic</Filter>
+    </ClInclude>
+    <ClInclude Include="tileCreator.h">
+      <Filter>graphics\logic</Filter>
+    </ClInclude>
+    <ClInclude Include="gameCache.h">
+      <Filter>graphics\logic</Filter>
+    </ClInclude>
+    <ClInclude Include="floorComponent.h">
+      <Filter>graphics\components</Filter>
+    </ClInclude>
+    <ClInclude Include="objectComponent.h">
+      <Filter>graphics\components</Filter>
+    </ClInclude>
+    <ClInclude Include="playerComponent.h">
+      <Filter>graphics\components</Filter>
+    </ClInclude>
+    <ClInclude Include="drawableComponent.h">
+      <Filter>graphics\components</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

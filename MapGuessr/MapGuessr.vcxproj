@@ -158,11 +158,31 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="floorComponent.cpp" />
+    <ClCompile Include="gameCache.cpp" />
+    <ClCompile Include="gameTile.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="objectComponent.cpp" />
+    <ClCompile Include="playerComponent.cpp" />
+    <ClCompile Include="renderController.cpp" />
     <ClCompile Include="tigl.cpp" />
+    <ClCompile Include="tileCreator.cpp" />
+    <ClCompile Include="tileManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="drawableComponent.h" />
+    <ClInclude Include="floorComponent.h" />
+    <ClInclude Include="gameCache.h" />
+    <ClInclude Include="gameTile.h" />
+    <ClInclude Include="objectComponent.h" />
+    <ClInclude Include="playerComponent.h" />
+    <ClInclude Include="renderController.h" />
     <ClInclude Include="tigl.h" />
+    <ClInclude Include="tileCreator.h" />
+    <ClInclude Include="tileManager.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
