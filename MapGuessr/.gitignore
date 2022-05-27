@@ -1,6 +1,7 @@
 .vs
 *.html
 *.css
+*.js
 x64
 Debug
 Release
