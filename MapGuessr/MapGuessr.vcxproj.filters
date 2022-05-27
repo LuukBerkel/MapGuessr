@@ -13,6 +13,15 @@
     <Filter Include="graphics">
       <UniqueIdentifier>{2a46eef9-bcdd-4614-97d0-f371892f4376}</UniqueIdentifier>
     </Filter>
+    <Filter Include="map">
+      <UniqueIdentifier>{7a7547bf-91c8-49b6-ac76-8981fa2c3bb0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphics\components">
+      <UniqueIdentifier>{f9011d10-78ab-4286-a0ec-19bd1be0bbdb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphics\logic">
+      <UniqueIdentifier>{83c493cc-9cd7-4081-976e-6e28834b9d4e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="tigl.h">
