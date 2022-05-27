@@ -1,0 +1,6 @@
+.vs
+*.html
+*.css
+x64
+Debug
+Release
