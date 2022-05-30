@@ -32,6 +32,9 @@
     <ClCompile Include="gameComponent.cpp">
       <Filter>graphics\components</Filter>
     </ClCompile>
+    <ClCompile Include="textureComponent.cpp">
+      <Filter>graphics\components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="libraries">
@@ -90,6 +93,12 @@
     <ClInclude Include="main.h" />
     <ClInclude Include="gameBehaviour.h">
       <Filter>graphics\behaviours</Filter>
+    </ClInclude>
+    <ClInclude Include="stb_image.h">
+      <Filter>libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="textureComponent.h">
+      <Filter>graphics\components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -13,12 +13,12 @@ public :
 	glm::vec3 scale = glm::vec3(1, 1, 1);
 
 	/**
-	 * @brief Base implementation of the draw method for component
+	 * @brief Interface of the draw method for component
 	*/
-	virtual void draw();
+	virtual void draw() = 0;
 
 	/**
-	 * @brief Base implementation for the update method for component
+	 * @brief Interface for the update method for component
 	 * 
 	 * @param timeElapsed This is the time passed since last frame update.
 	*/
@@ -33,8 +33,9 @@ public :
 	template<class T>
 	std::shared_ptr<T> getBehaviour() {
 		for (auto c : behaviours) {
-			std::shared_ptr<T> t = dynamic_pointer_cast<T>(c);
-			return t ? t : nullptr;
+			std::shared_ptr<T> t = std::dynamic_pointer_cast<T>(c);
+			if (t)
+				return t;
 		}
 	}
 
