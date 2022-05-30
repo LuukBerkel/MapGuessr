@@ -7,3 +7,13 @@ void gameComponent::update(float timeElapsed)
 		behaviour->update(timeElapsed);
 	}
 }
+
+gameComponent::gameComponent()
+{
+}
+
+gameComponent::~gameComponent()
+{
+}
+
+

@@ -2,10 +2,13 @@
 #include "renderController.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include "tigl.h"
+#include "objectComponent.h"
+#include <iostream>
+#include <glm/gtc/matrix_transform.hpp>
 
 using tigl::Vertex;
 
-
+objectComponent component;
 
 void renderController::init()
 {
@@ -15,6 +18,7 @@ void renderController::init()
 			if (key == GLFW_KEY_ESCAPE)
 				glfwSetWindowShouldClose(window, true);
 		});
+	component =  objectComponent("resources/car/honda_jazz.obj");
 }
 
 void renderController::update()
@@ -23,8 +27,24 @@ void renderController::update()
 
 void renderController::draw()
 {
-	glClearColor(0.3f, 0.4f, 0.6f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	tigl::shader->setProjectionMatrix(glm::perspective(glm::radians(70.0f), 1920.0f / 1080,0.1f, 200.0f));
+	tigl::shader->setViewMatrix(glm::lookAt(glm::vec3(0, 0, 5), glm::vec3(0, 0, 0),
+		glm::vec3(0, 1, 0)));
+	tigl::shader->setModelMatrix(glm::mat4(1.0f));
+
+	tigl::shader->enableColor(true);
+
+	tigl::begin(GL_QUADS);
+	tigl::addVertex(Vertex::PCN(glm::vec3(10, 100, 100), glm::vec4(1, 0.4, 0, 1), glm::vec3(0, 1, 0)));
+	tigl::addVertex(Vertex::PCN(glm::vec3(10, 100, 100), glm::vec4(1, 0.4, 0, 1), glm::vec3(0, 1, 0)));
+	tigl::addVertex(Vertex::PCN(glm::vec3(100, 100, 100), glm::vec4(1, 0.4, 0, 1), glm::vec3(0, 1, 0)));
+	tigl::addVertex(Vertex::PCN(glm::vec3(100, 100, 100), glm::vec4(1, 0.4, 0, 1), glm::vec3(0, 1, 0)));
+	tigl::end();
+
+
+	component.draw();
 }
 
 

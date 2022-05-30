@@ -1,6 +1,7 @@
 #include "objectComponent.h"
 #include <iostream>
 #include <fstream>
+#include <glm/gtc/matrix_transform.hpp>
 #include <algorithm>
 
 /**
@@ -127,6 +128,9 @@ void objectComponent::loadMaterialFile(const std::string& fileName, const std::s
 			params[0] == "td" ||
 			params[0] == "tf" ||
 			params[0] == "tr" ||
+			params[0] == "ka" ||
+			params[0] == "kd" ||
+			params[0] == "ks" ||
 			false)
 		{
 			//these values are usually not used for rendering at this time, so ignore them
@@ -139,7 +143,7 @@ void objectComponent::loadMaterialFile(const std::string& fileName, const std::s
 }
 
 
-objectComponent::objectComponent(const std::string& fileName)
+objectComponent::objectComponent(const std::string& fileName) : gameComponent()
 {
 	// Checking wheter the file actually exists
 	std::cout << "Loading " << fileName << std::endl;
@@ -222,10 +226,10 @@ objectComponent::objectComponent(const std::string& fileName)
 		}
 		else if (params[0] == "usemtl")
 		{
-			if (renderData.size() != 0){
-				tigl::VBO* vbo = tigl::createVbo(renderData);
-				if (vbo != nullptr) {
-					currentGroup->bufferedObjectVertices = vbo;
+			if (renderData.size() > 0){
+				std::cout << "Adding to groups";
+				currentGroup->bufferedObjectVertices = tigl::createVbo(renderData);
+				if (currentGroup->bufferedObjectVertices != nullptr) {
 					groups.push_back(currentGroup);
 					renderData.clear();
 				}
@@ -266,9 +270,17 @@ void objectComponent::draw()
 	// Enabling textures because standard disabled
 	tigl::shader->enableTexture(true);
 
+	glm::mat4 modelMatrix =glm::mat4(1.0f);
+	modelMatrix = glm::translate(modelMatrix, position);
+	modelMatrix = glm::rotate(modelMatrix, rotation.x, glm::vec3(1, 0, 0));
+	modelMatrix = glm::rotate(modelMatrix, rotation.y, glm::vec3(0, 1, 0));
+	modelMatrix = glm::rotate(modelMatrix, rotation.z, glm::vec3(0, 0, 1));
+	modelMatrix = glm::scale(modelMatrix, scale);
+
 	// Looping through list of obj-groups
 	for (std::shared_ptr<ObjectGroup> group : groups) {
 		materials.at(group->materialIndex)->texture->bind();
+		if (group->bufferedObjectVertices != nullptr)
 		tigl::drawVertices(GL_TRIANGLES, group->bufferedObjectVertices);
 	}
 

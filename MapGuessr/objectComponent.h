@@ -6,7 +6,7 @@
 #include <Vector>
 #include <Memory>
 
-class objectComponent : gameComponent {
+class objectComponent : gameComponent{
 private:
 	// This holds the vertices.
 	class ObjectGroup {
@@ -37,6 +37,7 @@ public:
 	 * 
 	 * @param fileName The path to the file.
 	*/
+	objectComponent() = default;
 	objectComponent(const std::string& fileName);
 	~objectComponent();
 

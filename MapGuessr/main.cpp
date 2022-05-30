@@ -1,11 +1,11 @@
 
 #include "renderController.h"
-#include "main.h"
+#include <iostream>
 
 
 int main(void)
 {
-
+    std::cout << "test";
     renderController();
     return 0;
 }

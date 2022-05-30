@@ -4,13 +4,13 @@
 #include <vector>
 #include <memory>
 
-class gameComponent {
+class gameComponent  {
 	std::vector<std::shared_ptr<gameBehaviour>> behaviours; 
 
 public : 
-	glm::vec3 position;
+	glm::vec3 position = glm::vec3(0,0,100);
 	glm::vec3 rotation = glm::vec3(0, 0, 0);
-	glm::vec3 scale = glm::vec3(1, 1, 1);
+	glm::vec3 scale = glm::vec3(0.1f, 0.1f, 0.1f);
 
 	/**
 	 * @brief Interface of the draw method for component
@@ -62,4 +62,8 @@ public :
 			behaviours.push_back(behaviour);
 		}
 	}
+
+	gameComponent();
+	~gameComponent();
+	
 };
