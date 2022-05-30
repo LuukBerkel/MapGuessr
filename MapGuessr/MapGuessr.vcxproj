@@ -160,6 +160,7 @@
   <ItemGroup>
     <ClCompile Include="floorComponent.cpp" />
     <ClCompile Include="gameCache.cpp" />
+    <ClCompile Include="gameComponent.cpp" />
     <ClCompile Include="gameTile.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="objectComponent.cpp" />
@@ -170,10 +171,12 @@
     <ClCompile Include="tileManager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="drawableComponent.h" />
+    <ClInclude Include="gameBehaviour.h" />
+    <ClInclude Include="gameComponent.h" />
     <ClInclude Include="floorComponent.h" />
     <ClInclude Include="gameCache.h" />
     <ClInclude Include="gameTile.h" />
+    <ClInclude Include="main.h" />
     <ClInclude Include="objectComponent.h" />
     <ClInclude Include="playerComponent.h" />
     <ClInclude Include="renderController.h" />

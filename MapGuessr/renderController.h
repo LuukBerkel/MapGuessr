@@ -15,9 +15,11 @@ private:
 	void init();
 	void update();
 	void draw();
+
 public:
 	/**
 	 * @brief Boots up the graphics  in a infinite loop. Warning is blocking call!
+	 * @note has no return unless application is closed
 	*/
 	renderController();
 };

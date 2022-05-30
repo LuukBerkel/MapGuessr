@@ -29,6 +29,9 @@
     <ClCompile Include="playerComponent.cpp">
       <Filter>graphics\components</Filter>
     </ClCompile>
+    <ClCompile Include="gameComponent.cpp">
+      <Filter>graphics\components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="libraries">
@@ -48,6 +51,9 @@
     </Filter>
     <Filter Include="graphics\management">
       <UniqueIdentifier>{ed6090a4-a1ea-4592-8e43-51562ee636bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphics\behaviours">
+      <UniqueIdentifier>{2d723080-3f1e-432e-bb4d-10e38dd421fc}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -78,8 +84,12 @@
     <ClInclude Include="playerComponent.h">
       <Filter>graphics\components</Filter>
     </ClInclude>
-    <ClInclude Include="drawableComponent.h">
+    <ClInclude Include="gameComponent.h">
       <Filter>graphics\components</Filter>
+    </ClInclude>
+    <ClInclude Include="main.h" />
+    <ClInclude Include="gameBehaviour.h">
+      <Filter>graphics\behaviours</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

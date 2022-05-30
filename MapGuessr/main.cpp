@@ -1,10 +1,11 @@
 
 #include "renderController.h"
+#include "main.h"
 
 
 int main(void)
 {
-    renderController();
 
+    renderController();
     return 0;
 }
