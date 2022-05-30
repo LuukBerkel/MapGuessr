@@ -177,7 +177,6 @@
     <ClInclude Include="floorComponent.h" />
     <ClInclude Include="gameCache.h" />
     <ClInclude Include="gameTile.h" />
-    <ClInclude Include="main.h" />
     <ClInclude Include="objectComponent.h" />
     <ClInclude Include="playerComponent.h" />
     <ClInclude Include="renderController.h" />

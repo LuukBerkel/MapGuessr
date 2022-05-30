@@ -90,7 +90,6 @@
     <ClInclude Include="gameComponent.h">
       <Filter>graphics\components</Filter>
     </ClInclude>
-    <ClInclude Include="main.h" />
     <ClInclude Include="gameBehaviour.h">
       <Filter>graphics\behaviours</Filter>
     </ClInclude>

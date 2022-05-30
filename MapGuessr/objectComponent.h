@@ -32,6 +32,11 @@ private:
 	void loadMaterialFile(const std::string& fileName, const std::string& dirName);
 
 public:
+	/**
+	 * @brief Loads an object in to memory for rendering with openGL
+	 * 
+	 * @param fileName The path to the file.
+	*/
 	objectComponent(const std::string& fileName);
 	~objectComponent();
 

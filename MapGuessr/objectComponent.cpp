@@ -141,6 +141,7 @@ void objectComponent::loadMaterialFile(const std::string& fileName, const std::s
 
 objectComponent::objectComponent(const std::string& fileName)
 {
+	// Checking wheter the file actually exists
 	std::cout << "Loading " << fileName << std::endl;
 	std::string dirName = fileName;
 	if (dirName.rfind("/") != std::string::npos)
@@ -150,7 +151,7 @@ objectComponent::objectComponent(const std::string& fileName)
 	if (fileName == dirName)
 		dirName = "";
 
-
+	// Opening file
 	std::ifstream pFile(fileName.c_str());
 
 	if (!pFile.is_open())
@@ -159,11 +160,15 @@ objectComponent::objectComponent(const std::string& fileName)
 		return;
 	}
 
-
+	// The object groups.
 	std::shared_ptr<ObjectGroup> currentGroup = std::make_shared<ObjectGroup>();
 	currentGroup->materialIndex = -1;
 
-
+	// Information for building the object
+	std::vector<glm::vec3> vertices;
+	std::vector<glm::vec3> normals;
+	std::vector<glm::vec2> texcoords;
+	std::vector<tigl::Vertex> renderData;
 
 	while (!pFile.eof())
 	{
@@ -176,39 +181,40 @@ objectComponent::objectComponent(const std::string& fileName)
 		std::vector<std::string> params = split(line, " ");
 		params[0] = toLower(params[0]);
 
+		// Location coordinate
 		if (params[0] == "v")
 			vertices.push_back(glm::vec3((float)atof(params[1].c_str()), (float)atof(params[2].c_str()), (float)atof(params[3].c_str())));
+		// Normal coordinate
 		else if (params[0] == "vn")
 			normals.push_back(glm::vec3((float)atof(params[1].c_str()), (float)atof(params[2].c_str()), (float)atof(params[3].c_str())));
+		// Texture coordinate
 		else if (params[0] == "vt")
 			texcoords.push_back(glm::vec2((float)atof(params[1].c_str()), 1 - (float)atof(params[2].c_str())));
+
+		// Structure data
 		else if (params[0] == "f")
 		{
 			for (size_t ii = 4; ii <= params.size(); ii++)
 			{
-				FaceCollection face;
-
-				for (size_t i = ii - 3; i < ii; i++)	//magische forlus om van quads triangles te maken ;)
+				for (size_t i = ii - 3; i < ii; i++)
 				{
-					VertexIndex vertex;
+					int position;
+					int normal;
+					int texcoord;
 					std::vector<std::string> indices = split(params[i == (ii - 3) ? 1 : i], "/");
 					if (indices.size() >= 1)	//er is een positie
-						vertex.position = atoi(indices[0].c_str()) - 1;
+						position = atoi(indices[0].c_str()) - 1;
 					if (indices.size() == 2)		//alleen texture
-						vertex.texcoord = atoi(indices[1].c_str()) - 1;
+						texcoord = atoi(indices[1].c_str()) - 1;
 					if (indices.size() == 3)		//v/t/n of v//n
 					{
 						if (indices[1] != "")
-							vertex.texcoord = atoi(indices[1].c_str()) - 1;
-						vertex.normal = atoi(indices[2].c_str()) - 1;
+							texcoord = atoi(indices[1].c_str()) - 1;
+						normal = atoi(indices[2].c_str()) - 1;
 					}
-					face.vertices.push_back(vertex);
+					renderData.push_back(tigl::Vertex::PTN(vertices.at(position), texcoords.at(texcoord), normals.at(normal)));
 				}
-				currentGroup->faces.push_back(face);
 			}
-		}
-		else if (params[0] == "s")
-		{//smoothing groups
 		}
 		else if (params[0] == "mtllib")
 		{
@@ -216,9 +222,16 @@ objectComponent::objectComponent(const std::string& fileName)
 		}
 		else if (params[0] == "usemtl")
 		{
-			if (currentGroup->faces.size() != 0)
-				groups.push_back(currentGroup);
-			currentGroup = std::make_shared<ObjGroup>();
+			if (renderData.size() != 0){
+				tigl::VBO* vbo = tigl::createVbo(renderData);
+				if (vbo != nullptr) {
+					currentGroup->bufferedObjectVertices = vbo;
+					groups.push_back(currentGroup);
+					renderData.clear();
+				}
+			}
+				
+			currentGroup = std::make_shared<ObjectGroup>();
 			currentGroup->materialIndex = -1;
 
 			for (size_t i = 0; i < materials.size(); i++)
@@ -236,6 +249,7 @@ objectComponent::objectComponent(const std::string& fileName)
 	}
 	groups.push_back(currentGroup);
 
+	// Printing debug information 
 	std::cout << "Amount of vertices: " << vertices.size() << std::endl;
 	std::cout << "Amount of normals: " << normals.size() << std::endl;
 	std::cout << "Amount of textures: " << materials.size() << std::endl;
