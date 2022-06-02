@@ -1,6 +1,8 @@
 
 #include "renderController.h"
 #include <iostream>
+#include <curl/curl.h>
+
 
 
 int main(void)
