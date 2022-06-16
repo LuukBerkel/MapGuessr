@@ -14,7 +14,7 @@
 #include <mutex>
 #include <map>
 
-#define GL_CALLS_HANDLE_AMOUNT 10
+#define GL_CALLS_HANDLE_AMOUNT 300
 
 
 class objectComponent : public drawComponent {
@@ -28,7 +28,7 @@ private:
 	class objectGroup {
 	public:
 		std::string name;					
-		tigl::VBO* bufferedObjectVertices;	
+		std::shared_ptr<tigl::VBO*> bufferedObjectVertices;	
 		int materialIndex;					
 	};
 
@@ -37,7 +37,7 @@ private:
 	public:
 		materialInfo();
 		std::string name;
-		std::shared_ptr<textureComponent> texture;
+		std::shared_ptr<std::shared_ptr<textureComponent>> texture;
 		glm::vec4 specular;
 		glm::vec4 ambient;
 		glm::vec4 diffuse;
@@ -56,24 +56,23 @@ public:
 	// Object that is created when building to communicate with gl thread.
 	class ObjectBuilderContainer {
 	public:
-		tigl::VBO* asyncObjectVBOCall(std::vector<tigl::Vertex> vertices, std::shared_ptr<ObjectBuilderContainer> context);
-		std::shared_ptr<textureComponent> asyncObjectTextureCall(std::string path, std::shared_ptr<ObjectBuilderContainer> context);
+		std::shared_ptr<tigl::VBO*> asyncObjectVBOCall(std::vector<tigl::Vertex> vertices, std::shared_ptr<ObjectBuilderContainer> context);
+		std::shared_ptr<std::shared_ptr<textureComponent>> asyncObjectTextureCall(std::string path, std::shared_ptr<ObjectBuilderContainer> context);
 
 		// Used for operation safety on objects.
 		std::mutex buildLock;
 		bool inputGiven = false;
-		bool outputGiven = false;
 
 		// Type of build operation
 		int operation = -1;
 
 		// Used for VBO create calls.
 		std::vector<tigl::Vertex> verticesRequest;
-		tigl::VBO* vboResponse;
+		std::shared_ptr<tigl::VBO*> vboResponse;
 
 		// Used for texure create calls.
 		std::string pathRequest;
-		std::shared_ptr<textureComponent> textureResponse;
+		std::shared_ptr<std::shared_ptr<textureComponent>> textureResponse;
 	};
 
 private:
@@ -81,8 +80,8 @@ private:
 	std::shared_ptr<objectFile> objectData = nullptr;
 
 	// Loads in the texture data.
-	void loadObjectFile(const std::string fileName, std::shared_ptr<ObjectBuilderContainer> context, int listIndex);
-	void loadMaterialFile(const std::string& fileName, const std::string& dirName, std::shared_ptr<objectFile>& file, std::shared_ptr<ObjectBuilderContainer> context);
+	void loadObjectFile(const std::string fileName);
+	void loadMaterialFile(const std::string& fileName, const std::string& dirName, std::shared_ptr<objectFile>& file);
 public:
 	/**
 	 * @brief This method loads object model on a async thread.

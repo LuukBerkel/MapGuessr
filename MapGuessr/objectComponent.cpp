@@ -81,7 +81,7 @@ objectComponent::materialInfo::materialInfo()
 ///////////////////////////////////////////////// Parsing functions /////////////////////////////////////////////////////////////////
 
 /*Loads the objectfile and adds it to the list of objects for the animation*/
-void objectComponent::loadObjectFile(const std::string fileName, std::shared_ptr<ObjectBuilderContainer> context, int listIndex)
+void objectComponent::loadObjectFile(const std::string fileName)
 {
 	// Checking wheter the file actually exists
 	std::cout << "Loading " << fileName << std::endl;
@@ -161,11 +161,12 @@ void objectComponent::loadObjectFile(const std::string fileName, std::shared_ptr
 		}
 		else if (params[0] == "mtllib")
 		{
-			loadMaterialFile(dirName + "/" + params[1], dirName, file, context);
+			loadMaterialFile(dirName + "/" + params[1], dirName, file);
 		}
 		else if (params[0] == "usemtl")
 		{
 			if (renderData.size() > 0) {
+				std::shared_ptr<ObjectBuilderContainer> context = std::make_shared<ObjectBuilderContainer>();
 				currentGroup->bufferedObjectVertices = context->asyncObjectVBOCall(renderData, context);
 				if (currentGroup->bufferedObjectVertices != nullptr) {
 					file->groups.push_back(currentGroup);
@@ -191,6 +192,7 @@ void objectComponent::loadObjectFile(const std::string fileName, std::shared_ptr
 	}
 
 	if (renderData.size() > 0) {
+		std::shared_ptr<ObjectBuilderContainer> context = std::make_shared<ObjectBuilderContainer>();
 		currentGroup->bufferedObjectVertices = context->asyncObjectVBOCall(renderData, context);
 		if (currentGroup->bufferedObjectVertices != nullptr) {
 			file->groups.push_back(currentGroup);
@@ -212,7 +214,7 @@ void objectComponent::loadObjectFile(const std::string fileName, std::shared_ptr
 /**
 * Reads a material file
 */
-void objectComponent::loadMaterialFile(const std::string& fileName, const std::string& dirName, std::shared_ptr<objectFile>& file, std::shared_ptr<ObjectBuilderContainer> context)
+void objectComponent::loadMaterialFile(const std::string& fileName, const std::string& dirName, std::shared_ptr<objectFile>& file)
 {
 	std::cout << "Loading " << fileName << std::endl;
 	std::ifstream pFile(fileName.c_str());
@@ -252,6 +254,7 @@ void objectComponent::loadMaterialFile(const std::string& fileName, const std::s
 			if (tex.find("\\"))
 				tex = tex.substr(tex.rfind("\\") + 1);
 			if (currentMaterial != NULL) {
+				std::shared_ptr<ObjectBuilderContainer> context = std::make_shared<ObjectBuilderContainer>();
 				currentMaterial->texture = context->asyncObjectTextureCall(dirName + "/" + tex, context);
 			}
 		}
@@ -305,8 +308,7 @@ objectComponent::objectComponent(const std::string& fileName)
 	cachedObjectsLock.unlock();
 
 	// Starting async loading process
-	std::shared_ptr<ObjectBuilderContainer> build = std::make_shared<ObjectBuilderContainer>();
-	std::thread thread(&objectComponent::loadObjectFile, this, fileName, build, 0);
+	std::thread thread(&objectComponent::loadObjectFile, this, fileName, 0);
 
 	// Starting process
 	thread.detach();
@@ -324,10 +326,10 @@ void objectComponent::draw()
 			if (objectData->materials.at(group->materialIndex)->texture != nullptr) {
 				// Enabling textures because standard disabled
 				tigl::shader->enableTexture(true);
-				objectData->materials.at(group->materialIndex)->texture->bind();
+				objectData->materials.at(group->materialIndex)->texture->get()->bind();
 			}
-			if (group->bufferedObjectVertices != nullptr)
-				tigl::drawVertices(GL_TRIANGLES, group->bufferedObjectVertices);
+			if (*group->bufferedObjectVertices != nullptr)
+				tigl::drawVertices(GL_TRIANGLES, *group->bufferedObjectVertices);
 			tigl::shader->enableTexture(false);
 		}
 
@@ -338,44 +340,32 @@ void objectComponent::draw()
 
 /////////////////////////////// Multitheaded loading requests to gl thread ////////////////////////////////////////
 
-tigl::VBO* objectComponent::ObjectBuilderContainer::asyncObjectVBOCall(std::vector<tigl::Vertex> vertices, std::shared_ptr<ObjectBuilderContainer> context)
+std::shared_ptr<tigl::VBO*> objectComponent::ObjectBuilderContainer::asyncObjectVBOCall(std::vector<tigl::Vertex> vertices, std::shared_ptr<ObjectBuilderContainer> context)
 {
+	std::shared_ptr<tigl::VBO*> vbo = std::make_shared<tigl::VBO*>();
+
 	buildLock.lock();
-	vboResponse = nullptr;
+	vboResponse = vbo;
 	verticesRequest = vertices;
 	inputGiven = true;
-	outputGiven = false;
 	operation = 0;
-
 	buildLock.unlock();
 
 	buildQueueLock.lock();
 	buildQueue.emplace(context);
 	buildQueueLock.unlock();
 
-
-	while (true) {
-		buildLock.lock();
-		if (outputGiven == true) {
-			inputGiven = false;
-			outputGiven = false;
-			buildLock.unlock();
-			return vboResponse;
-		}
-		buildLock.unlock();
-
-		// Sleep to give other threads time to edit.
-		std::this_thread::sleep_for(std::chrono::microseconds(50));
-	}
+	return vbo;
 }
 
-std::shared_ptr<textureComponent> objectComponent::ObjectBuilderContainer::asyncObjectTextureCall(std::string path, std::shared_ptr<ObjectBuilderContainer> context)
+std::shared_ptr<std::shared_ptr<textureComponent>> objectComponent::ObjectBuilderContainer::asyncObjectTextureCall(std::string path, std::shared_ptr<ObjectBuilderContainer> context)
 {
+	std::shared_ptr<std::shared_ptr<textureComponent>> tex = std::make_shared<std::shared_ptr<textureComponent>>();
+
 	buildLock.lock();
-	textureResponse = nullptr;
+	textureResponse = tex;
 	pathRequest = path;
 	inputGiven = true;
-	outputGiven = false;
 	operation = 1;
 	buildLock.unlock();
 
@@ -383,19 +373,7 @@ std::shared_ptr<textureComponent> objectComponent::ObjectBuilderContainer::async
 	buildQueue.emplace(context);
 	buildQueueLock.unlock();
 
-	while (true) {
-		buildLock.lock();
-		if (outputGiven == true) {
-			inputGiven = false;
-			outputGiven = false;
-			buildLock.unlock();
-			return textureResponse;
-		}
-		buildLock.unlock();
-
-		// Sleep to give other threads time to edit.
-		std::this_thread::sleep_for(std::chrono::microseconds(50));
-	}
+	return tex;
 }
 
 //////////////////////////////////////////// Routine function called every update to load stuff /////////////////////////////
@@ -415,14 +393,13 @@ void loadObjectIterate()
 		if (buildQueue.front()->inputGiven == true) {
 			if (buildQueue.front()->operation == 0)
 			{
-				buildQueue.front()->vboResponse = tigl::createVbo(buildQueue.front()->verticesRequest);
+				*buildQueue.front()->vboResponse = tigl::createVbo(buildQueue.front()->verticesRequest);
 			}
 			else if (buildQueue.front()->operation == 1)
 			{
-				buildQueue.front()->textureResponse = std::make_shared<textureComponent>(buildQueue.front()->pathRequest);
+				*buildQueue.front()->textureResponse = std::make_shared<textureComponent>(buildQueue.front()->pathRequest);
+			
 			}
-			buildQueue.front()->inputGiven = false;
-			buildQueue.front()->outputGiven = true;
 		}
 
 		// Clearing the work required
