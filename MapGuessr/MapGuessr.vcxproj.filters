@@ -5,43 +5,31 @@
     <ClCompile Include="tigl.cpp">
       <Filter>libraries</Filter>
     </ClCompile>
-    <ClCompile Include="renderController.cpp">
-      <Filter>graphics\management</Filter>
-    </ClCompile>
-    <ClCompile Include="tileManager.cpp">
-      <Filter>graphics\management</Filter>
-    </ClCompile>
-    <ClCompile Include="gameTile.cpp">
-      <Filter>graphics\logic</Filter>
-    </ClCompile>
-    <ClCompile Include="tileCreator.cpp">
-      <Filter>graphics\logic</Filter>
-    </ClCompile>
-    <ClCompile Include="gameCache.cpp">
-      <Filter>graphics\logic</Filter>
-    </ClCompile>
-    <ClCompile Include="objectComponent.cpp">
-      <Filter>graphics\components</Filter>
-    </ClCompile>
-    <ClCompile Include="floorComponent.cpp">
-      <Filter>graphics\components</Filter>
-    </ClCompile>
-    <ClCompile Include="playerComponent.cpp">
-      <Filter>graphics\components</Filter>
-    </ClCompile>
     <ClCompile Include="gameComponent.cpp">
-      <Filter>graphics\components</Filter>
+      <Filter>graphics\components\interfaces</Filter>
     </ClCompile>
     <ClCompile Include="textureComponent.cpp">
-      <Filter>graphics\components</Filter>
+      <Filter>graphics\components\interfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="floorComponent.cpp">
+      <Filter>graphics\components\implementations</Filter>
+    </ClCompile>
+    <ClCompile Include="objectComponent.cpp">
+      <Filter>graphics\components\implementations</Filter>
+    </ClCompile>
+    <ClCompile Include="playerComponent.cpp">
+      <Filter>graphics\components\implementations</Filter>
+    </ClCompile>
+    <ClCompile Include="drawComponent.cpp">
+      <Filter>graphics\components\interfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="gameObject.cpp">
+      <Filter>graphics\logic</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="libraries">
       <UniqueIdentifier>{1ec98e5e-462c-43b0-9e28-778e40a3d8e1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="map">
-      <UniqueIdentifier>{f2ffc1c2-ee19-401e-9b95-aa7fa3092a35}</UniqueIdentifier>
     </Filter>
     <Filter Include="graphics">
       <UniqueIdentifier>{f4bf4469-0af6-420a-8ee5-be39bcc357c3}</UniqueIdentifier>
@@ -52,52 +40,40 @@
     <Filter Include="graphics\logic">
       <UniqueIdentifier>{136d6c97-fdc8-4b97-ab80-e24829d18ac4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="graphics\management">
-      <UniqueIdentifier>{ed6090a4-a1ea-4592-8e43-51562ee636bd}</UniqueIdentifier>
+    <Filter Include="graphics\components\interfaces">
+      <UniqueIdentifier>{285e693f-1534-4a55-8474-a52d27a66498}</UniqueIdentifier>
     </Filter>
-    <Filter Include="graphics\behaviours">
-      <UniqueIdentifier>{2d723080-3f1e-432e-bb4d-10e38dd421fc}</UniqueIdentifier>
+    <Filter Include="graphics\components\implementations">
+      <UniqueIdentifier>{95b132ad-8b7d-45e8-a9bb-e1e19d18fef7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="tigl.h">
       <Filter>libraries</Filter>
     </ClInclude>
-    <ClInclude Include="renderController.h">
-      <Filter>graphics\management</Filter>
-    </ClInclude>
-    <ClInclude Include="tileManager.h">
-      <Filter>graphics\management</Filter>
-    </ClInclude>
-    <ClInclude Include="gameTile.h">
-      <Filter>graphics\logic</Filter>
-    </ClInclude>
-    <ClInclude Include="tileCreator.h">
-      <Filter>graphics\logic</Filter>
-    </ClInclude>
-    <ClInclude Include="gameCache.h">
-      <Filter>graphics\logic</Filter>
-    </ClInclude>
-    <ClInclude Include="floorComponent.h">
-      <Filter>graphics\components</Filter>
-    </ClInclude>
-    <ClInclude Include="objectComponent.h">
-      <Filter>graphics\components</Filter>
-    </ClInclude>
-    <ClInclude Include="playerComponent.h">
-      <Filter>graphics\components</Filter>
-    </ClInclude>
-    <ClInclude Include="gameComponent.h">
-      <Filter>graphics\components</Filter>
-    </ClInclude>
-    <ClInclude Include="gameBehaviour.h">
-      <Filter>graphics\behaviours</Filter>
-    </ClInclude>
     <ClInclude Include="stb_image.h">
       <Filter>libraries</Filter>
     </ClInclude>
+    <ClInclude Include="gameComponent.h">
+      <Filter>graphics\components\interfaces</Filter>
+    </ClInclude>
     <ClInclude Include="textureComponent.h">
-      <Filter>graphics\components</Filter>
+      <Filter>graphics\components\interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="floorComponent.h">
+      <Filter>graphics\components\implementations</Filter>
+    </ClInclude>
+    <ClInclude Include="objectComponent.h">
+      <Filter>graphics\components\implementations</Filter>
+    </ClInclude>
+    <ClInclude Include="playerComponent.h">
+      <Filter>graphics\components\implementations</Filter>
+    </ClInclude>
+    <ClInclude Include="drawComponent.h">
+      <Filter>graphics\components\interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="gameObject.h">
+      <Filter>graphics\logic</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

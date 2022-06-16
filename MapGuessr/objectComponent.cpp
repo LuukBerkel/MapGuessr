@@ -3,6 +3,9 @@
 #include <fstream>
 #include <glm/gtc/matrix_transform.hpp>
 #include <algorithm>
+#include <filesystem>
+#include <thread>
+#include <mutex>
 
 /**
 * Replaces a substring in a string
@@ -69,81 +72,14 @@ static inline std::string cleanLine(std::string line)
 	return line;
 }
 
-/**
-* Reads a material file 
-*/
-void objectComponent::loadMaterialFile(const std::string& fileName, const std::string& dirName)
+OBJComponent::MaterialInfo::MaterialInfo()
 {
-	std::cout << "Loading " << fileName << std::endl;
-	std::ifstream pFile(fileName.c_str());
-	if (!pFile.is_open())
-	{
-		std::cout << "Could not open file " << fileName << std::endl;
-		return;
-	}
-
-	std::shared_ptr<MaterialInfo> currentMaterial = NULL;
-
-	while (!pFile.eof())
-	{
-		std::string line;
-		std::getline(pFile, line);
-		line = cleanLine(line);
-		if (line == "" || line[0] == '#')
-			continue;
-
-		std::vector<std::string> params = split(line, " ");
-		params[0] = toLower(params[0]);
-
-		if (params[0] == "newmtl")
-		{
-			if (currentMaterial != NULL)
-			{
-				materials.push_back(currentMaterial);
-			}
-			currentMaterial = std::make_shared<MaterialInfo>();
-			currentMaterial->name = params[1];
-		}
-		else if (params[0] == "map_kd")
-		{
-			std::string tex = params[1];
-			if (tex.find("/"))
-				tex = tex.substr(tex.rfind("/") + 1);
-			if (tex.find("\\"))
-				tex = tex.substr(tex.rfind("\\") + 1);
-			if (currentMaterial != NULL) {
-				currentMaterial->texture = std::make_shared<textureComponent>(dirName + "/" + tex);
-			}
-		}
-		else if (
-			params[0] == "illum" ||
-			params[0] == "map_bump" ||
-			params[0] == "map_ke" ||
-			params[0] == "map_ka" ||
-			params[0] == "map_d" ||
-			params[0] == "d" ||
-			params[0] == "ke" ||
-			params[0] == "ns" ||
-			params[0] == "ni" ||
-			params[0] == "td" ||
-			params[0] == "tf" ||
-			params[0] == "tr" ||
-			params[0] == "ka" ||
-			params[0] == "kd" ||
-			params[0] == "ks" ||
-			false)
-		{
-			//these values are usually not used for rendering at this time, so ignore them
-		}
-		else
-			std::cout << "Didn't parse " << params[0] << " in material file" << std::endl;
-	}
-	if (currentMaterial != NULL)
-		materials.push_back(currentMaterial);
+	texture = NULL;
 }
 
 
-objectComponent::objectComponent(const std::string& fileName) : gameComponent()
+/*Loads the objectfile and adds it to the list of objects for the animation*/
+void OBJComponent::loadObjectFile(const std::string fileName, std::shared_ptr<ObjectBuilderContainer> context, int listIndex)
 {
 	// Checking wheter the file actually exists
 	std::cout << "Loading " << fileName << std::endl;
@@ -173,6 +109,7 @@ objectComponent::objectComponent(const std::string& fileName) : gameComponent()
 	std::vector<glm::vec3> normals;
 	std::vector<glm::vec2> texcoords;
 	std::vector<tigl::Vertex> renderData;
+	std::shared_ptr<ObjectFile> file = std::make_shared<ObjectFile>();
 
 	while (!pFile.eof())
 	{
@@ -204,7 +141,7 @@ objectComponent::objectComponent(const std::string& fileName) : gameComponent()
 				{
 					int position;
 					int normal;
-					int texcoord;
+					int texcoord = -1;
 					std::vector<std::string> indices = split(params[i == (ii - 3) ? 1 : i], "/");
 					if (indices.size() >= 1)	//er is een positie
 						position = atoi(indices[0].c_str()) - 1;
@@ -216,31 +153,30 @@ objectComponent::objectComponent(const std::string& fileName) : gameComponent()
 							texcoord = atoi(indices[1].c_str()) - 1;
 						normal = atoi(indices[2].c_str()) - 1;
 					}
-					renderData.push_back(tigl::Vertex::PTN(vertices.at(position), texcoords.at(texcoord), normals.at(normal)));
+					renderData.push_back(tigl::Vertex::PCTN(vertices.at(position), file->materials.at(currentGroup->materialIndex)->diffuse, (texcoord == -1? glm::vec3(0): texcoords.at(texcoord)), normals.at(normal)));
 				}
 			}
 		}
 		else if (params[0] == "mtllib")
 		{
-			loadMaterialFile(dirName + "/" + params[1], dirName);
+			loadMaterialFile(dirName + "/" + params[1], dirName, file, context);
 		}
 		else if (params[0] == "usemtl")
 		{
-			if (renderData.size() > 0){
-				std::cout << "Adding to groups";
-				currentGroup->bufferedObjectVertices = tigl::createVbo(renderData);
+			if (renderData.size() > 0) {
+				currentGroup->bufferedObjectVertices = context->asyncObjectVBOCall(renderData);
 				if (currentGroup->bufferedObjectVertices != nullptr) {
-					groups.push_back(currentGroup);
+					file->groups.push_back(currentGroup);
 					renderData.clear();
 				}
 			}
-				
+
 			currentGroup = std::make_shared<ObjectGroup>();
 			currentGroup->materialIndex = -1;
 
-			for (size_t i = 0; i < materials.size(); i++)
+			for (size_t i = 0; i < file->materials.size(); i++)
 			{
-				std::shared_ptr<MaterialInfo> info = materials.at(i);
+				std::shared_ptr<MaterialInfo> info = file->materials.at(i);
 				if (info->name == params[1])
 				{
 					currentGroup->materialIndex = i;
@@ -251,44 +187,205 @@ objectComponent::objectComponent(const std::string& fileName) : gameComponent()
 				std::cout << "Could not find material name " << params[1] << std::endl;
 		}
 	}
-	groups.push_back(currentGroup);
 
-	// Printing debug information 
-	std::cout << "Amount of vertices: " << vertices.size() << std::endl;
-	std::cout << "Amount of normals: " << normals.size() << std::endl;
-	std::cout << "Amount of textures: " << materials.size() << std::endl;
-	std::cout << "Amount of texcoords: " << texcoords.size() << std::endl;
-	std::cout << "Amount of groups: " << groups.size() << std::endl;
-}
-
-objectComponent::~objectComponent()
-{
-}
-
-void objectComponent::draw()
-{
-	// Enabling textures because standard disabled
-	tigl::shader->enableTexture(true);
-
-	glm::mat4 modelMatrix =glm::mat4(1.0f);
-	modelMatrix = glm::translate(modelMatrix, position);
-	modelMatrix = glm::rotate(modelMatrix, rotation.x, glm::vec3(1, 0, 0));
-	modelMatrix = glm::rotate(modelMatrix, rotation.y, glm::vec3(0, 1, 0));
-	modelMatrix = glm::rotate(modelMatrix, rotation.z, glm::vec3(0, 0, 1));
-	modelMatrix = glm::scale(modelMatrix, scale);
-
-	// Looping through list of obj-groups
-	for (std::shared_ptr<ObjectGroup> group : groups) {
-		materials.at(group->materialIndex)->texture->bind();
-		if (group->bufferedObjectVertices != nullptr)
-		tigl::drawVertices(GL_TRIANGLES, group->bufferedObjectVertices);
+	if (renderData.size() > 0) {
+		currentGroup->bufferedObjectVertices = context->asyncObjectVBOCall(renderData);
+		if (currentGroup->bufferedObjectVertices != nullptr) {
+			file->groups.push_back(currentGroup);
+			renderData.clear();
+		}
 	}
 
-	// Disabling textures else components with colors will get textures
-	tigl::shader->enableTexture(false);
+	// File is done
+	objectData = file;
+
+	// Adding it to cache
+	cachedObjectsLock.lock();
+	cachedObjects.insert({ fileName, objectData });
+	cachedObjectsLock.unlock();
 }
 
-objectComponent::MaterialInfo::MaterialInfo()
+/**
+* Reads a material file
+*/
+void OBJComponent::loadMaterialFile(const std::string& fileName, const std::string& dirName, std::shared_ptr<ObjectFile>& file, std::shared_ptr<ObjectBuilderContainer> context)
 {
-	texture = NULL;
+	std::cout << "Loading " << fileName << std::endl;
+	std::ifstream pFile(fileName.c_str());
+	if (!pFile.is_open())
+	{
+		std::cout << "Could not open file " << fileName << std::endl;
+		return;
+	}
+
+	std::shared_ptr<MaterialInfo> currentMaterial = NULL;
+
+	while (!pFile.eof())
+	{
+		std::string line;
+		std::getline(pFile, line);
+		line = cleanLine(line);
+		if (line == "" || line[0] == '#')
+			continue;
+
+		std::vector<std::string> params = split(line, " ");
+		params[0] = toLower(params[0]);
+
+		if (params[0] == "newmtl")
+		{
+			if (currentMaterial != NULL)
+			{
+				file->materials.push_back(currentMaterial);
+			}
+			currentMaterial = std::make_shared<MaterialInfo>();
+			currentMaterial->name = params[1];
+		}
+		else if (params[0] == "map_kd")
+		{
+			std::string tex = params[1];
+			if (tex.find("/"))
+				tex = tex.substr(tex.rfind("/") + 1);
+			if (tex.find("\\"))
+				tex = tex.substr(tex.rfind("\\") + 1);
+			if (currentMaterial != NULL) {
+				currentMaterial->texture = context->asyncObjectTextureCall(dirName + "/" + tex);
+			}
+		}
+		else if (params[0] == "kd")
+		{
+			currentMaterial->diffuse = glm::vec4((float)atof(params[1].c_str()), (float)atof(params[2].c_str()), (float)atof(params[3].c_str()), 1.0f);
+		}
+		else if (params[0] == "ka")
+		{
+			currentMaterial->ambient = glm::vec4((float)atof(params[1].c_str()), (float)atof(params[2].c_str()), (float)atof(params[3].c_str()), 1.0f);
+		}
+		else if (params[0] == "ks")
+		{
+			currentMaterial->specular = glm::vec4((float)atof(params[1].c_str()), (float)atof(params[2].c_str()), (float)atof(params[3].c_str()), 1.0f);
+		}
+		else if (
+			params[0] == "illum" ||
+			params[0] == "map_bump" ||
+			params[0] == "map_ke" ||
+			params[0] == "map_ka" ||
+			params[0] == "map_d" ||
+			params[0] == "d" ||
+			params[0] == "ke" ||
+			params[0] == "ns" ||
+			params[0] == "ni" ||
+			params[0] == "td" ||
+			params[0] == "tf" ||
+			params[0] == "tr" ||
+			false)
+		{
+			//these values are usually not used for rendering at this time, so ignore them
+		}
+		else
+			std::cout << "Didn't parse " << params[0] << " in material file" << std::endl;
+	}
+	if (currentMaterial != NULL)
+		file->materials.push_back(currentMaterial);
+}
+
+///////////////////////////////////// Functions accesable for the outside. //////////////////////////////////////
+
+OBJComponent::OBJComponent(const std::string& fileName)
+{
+	// If in cache
+	cachedObjectsLock.lock();
+	if (cachedObjects.contains(fileName)) {
+		objectData = cachedObjects.at(fileName);
+		cachedObjectsLock.unlock();
+		return;
+	}
+	cachedObjectsLock.unlock();
+
+	// Starting async loading process
+	std::shared_ptr<ObjectBuilderContainer> build = std::make_shared<ObjectBuilderContainer>();
+	std::thread thread(&OBJComponent::loadObjectFile, this, fileName, build, 0);
+
+	// Starting process
+	buildQueue.emplace(build);
+	thread.detach();
+}
+
+OBJComponent::~OBJComponent()
+{
+}
+
+void OBJComponent::draw()
+{
+	if (objectData != nullptr) {
+		// Looping through list of obj-groups
+		for (std::shared_ptr<ObjectGroup> group : objectData->groups) {
+			if (objectData->materials.at(group->materialIndex)->texture != nullptr) {
+				// Enabling textures because standard disabled
+				tigl::shader->enableTexture(true);
+				objectData->materials.at(group->materialIndex)->texture->bind();
+			}
+			if (group->bufferedObjectVertices != nullptr)
+				tigl::drawVertices(GL_TRIANGLES, group->bufferedObjectVertices);
+			tigl::shader->enableTexture(false);
+		}
+
+		// Disabling textures else components with colors will get textures
+		tigl::shader->enableTexture(false);
+	}
+}
+
+/////////////////////////////// Multitheaded loading stuff ////////////////////////////////////////
+
+tigl::VBO* OBJComponent::ObjectBuilderContainer::asyncObjectVBOCall(std::vector<tigl::Vertex> vertices)
+{
+	buildLock.lock();
+	vboResponse = nullptr;
+	verticesRequest = vertices;
+	inputGiven = true;
+	outputGiven = false;
+	operation = 0;
+	buildLock.unlock();
+
+	while (true) {
+		buildLock.lock();
+		if (outputGiven == true) {
+			inputGiven = false;
+			outputGiven = false;
+			buildLock.unlock();
+			return vboResponse;
+		}
+		buildLock.unlock();
+
+		// Sleep to give other threads time to edit.
+		std::this_thread::sleep_for(std::chrono::microseconds(50));
+	}
+}
+
+std::shared_ptr<textureComponent> OBJComponent::ObjectBuilderContainer::asyncObjectTextureCall(std::string path)
+{
+	buildLock.lock();
+	textureResponse = nullptr;
+	pathRequest = path;
+	inputGiven = true;
+	outputGiven = false;
+	operation = 1;
+	buildLock.unlock();
+
+	while (true) {
+		buildLock.lock();
+		if (outputGiven == true) {
+			inputGiven = false;
+			outputGiven = false;
+			buildLock.unlock();
+			return textureResponse;
+		}
+		buildLock.unlock();
+
+		// Sleep to give other threads time to edit.
+		std::this_thread::sleep_for(std::chrono::microseconds(50));
+	}
+}
+
+void OBJComponent::update(float elapsedTime)
+{
+
 }
