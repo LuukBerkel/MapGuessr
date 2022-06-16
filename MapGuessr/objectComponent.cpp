@@ -305,7 +305,9 @@ OBJComponent::OBJComponent(const std::string& fileName)
 	std::thread thread(&OBJComponent::loadObjectFile, this, fileName, build, 0);
 
 	// Starting process
+	buildQueueLock.lock();
 	buildQueue.emplace(build);
+	buildQueueLock.unlock();
 	thread.detach();
 }
 
@@ -385,7 +387,33 @@ std::shared_ptr<textureComponent> OBJComponent::ObjectBuilderContainer::asyncObj
 	}
 }
 
-void OBJComponent::update(float elapsedTime)
+void loadObjectIterate()
 {
+	buildQueueLock.lock();
+	for (int i = 0; i < GL_CALLS_HANDLE_AMOUNT; i++){
+		// Performance guard if empty.
+		if (buildQueue.front() == nullptr) {
+			return;
+		}
 
+		// Executing gl thread creating work.
+		buildQueue.front()->buildLock.lock();
+		if (buildQueue.front()->inputGiven == true) {
+			if (buildQueue.front()->operation == 0)
+			{
+				buildQueue.front()->vboResponse = tigl::createVbo(buildQueue.front()->verticesRequest);
+			}
+			else if (buildQueue.front()->operation == 1)
+			{
+				buildQueue.front()->textureResponse = std::make_shared<textureComponent>(buildQueue.front()->pathRequest);
+			}
+			buildQueue.front()->inputGiven = false;
+			buildQueue.front()->outputGiven = true;
+		}
+
+		// Clearing the work required
+		buildQueue.front()->buildLock.unlock();
+		buildQueue.pop();
+	}
+	buildQueueLock.unlock();
 }

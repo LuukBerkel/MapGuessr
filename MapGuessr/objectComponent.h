@@ -14,6 +14,8 @@
 #include <mutex>
 #include <map>
 
+#define GL_CALLS_HANDLE_AMOUNT 10
+
 
 class OBJComponent : public drawComponent {
 private:
@@ -51,13 +53,12 @@ public:
 		int animationIndex;
 	};
 
-private: 
 	// Object that is created when building to communicate with gl thread.
 	class ObjectBuilderContainer {
 	public:
 		tigl::VBO* asyncObjectVBOCall(std::vector<tigl::Vertex> vertices);
 		std::shared_ptr<textureComponent> asyncObjectTextureCall(std::string path);
-	private:
+
 		// Used for operation safety on objects.
 		std::mutex buildLock;
 		bool inputGiven = false;
@@ -75,9 +76,7 @@ private:
 		std::shared_ptr<textureComponent> textureResponse;
 	};
 
-	// Holds the amount of working threads.
-	std::queue<std::shared_ptr<ObjectBuilderContainer>> buildQueue;
-	std::mutex buildQueueLock;
+private:
 	
 	// Holds the information about the object
 	std::shared_ptr<ObjectFile> objectData = nullptr;
@@ -95,9 +94,15 @@ public:
 	~OBJComponent();
 
 	virtual void draw() override;
-	virtual void update(float elapsedTime) override;
 };
 
 // Global private caching map.
 static std::map<std::string, std::shared_ptr<OBJComponent::ObjectFile>> cachedObjects;
 static std::mutex cachedObjectsLock;
+
+// Holds the amount of working threads.
+static std::queue<std::shared_ptr<OBJComponent::ObjectBuilderContainer>> buildQueue;
+static std::mutex buildQueueLock;
+
+// Loads the objects and is called once every cycle.
+void loadObjectIterate();
