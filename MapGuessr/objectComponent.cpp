@@ -393,6 +393,7 @@ void loadObjectIterate()
 	for (int i = 0; i < GL_CALLS_HANDLE_AMOUNT; i++){
 		// Performance guard if empty.
 		if (buildQueue.front() == nullptr) {
+			buildQueueLock.unlock();
 			return;
 		}
 
