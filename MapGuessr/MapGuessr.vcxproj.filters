@@ -46,6 +46,9 @@
     <Filter Include="graphics\components\implementations">
       <UniqueIdentifier>{95b132ad-8b7d-45e8-a9bb-e1e19d18fef7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="geography">
+      <UniqueIdentifier>{70027bb1-1fa4-47eb-b212-e48e60ecf0c6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="tigl.h">

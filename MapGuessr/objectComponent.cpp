@@ -72,14 +72,14 @@ static inline std::string cleanLine(std::string line)
 	return line;
 }
 
-OBJComponent::MaterialInfo::MaterialInfo()
+objectComponent::materialInfo::materialInfo()
 {
 	texture = NULL;
 }
 
 
 /*Loads the objectfile and adds it to the list of objects for the animation*/
-void OBJComponent::loadObjectFile(const std::string fileName, std::shared_ptr<ObjectBuilderContainer> context, int listIndex)
+void objectComponent::loadObjectFile(const std::string fileName, std::shared_ptr<ObjectBuilderContainer> context, int listIndex)
 {
 	// Checking wheter the file actually exists
 	std::cout << "Loading " << fileName << std::endl;
@@ -101,7 +101,7 @@ void OBJComponent::loadObjectFile(const std::string fileName, std::shared_ptr<Ob
 	}
 
 	// The object groups.
-	std::shared_ptr<ObjectGroup> currentGroup = std::make_shared<ObjectGroup>();
+	std::shared_ptr<objectGroup> currentGroup = std::make_shared<objectGroup>();
 	currentGroup->materialIndex = -1;
 
 	// Information for building the object
@@ -109,7 +109,7 @@ void OBJComponent::loadObjectFile(const std::string fileName, std::shared_ptr<Ob
 	std::vector<glm::vec3> normals;
 	std::vector<glm::vec2> texcoords;
 	std::vector<tigl::Vertex> renderData;
-	std::shared_ptr<ObjectFile> file = std::make_shared<ObjectFile>();
+	std::shared_ptr<objectFile> file = std::make_shared<objectFile>();
 
 	while (!pFile.eof())
 	{
@@ -171,12 +171,12 @@ void OBJComponent::loadObjectFile(const std::string fileName, std::shared_ptr<Ob
 				}
 			}
 
-			currentGroup = std::make_shared<ObjectGroup>();
+			currentGroup = std::make_shared<objectGroup>();
 			currentGroup->materialIndex = -1;
 
 			for (size_t i = 0; i < file->materials.size(); i++)
 			{
-				std::shared_ptr<MaterialInfo> info = file->materials.at(i);
+				std::shared_ptr<materialInfo> info = file->materials.at(i);
 				if (info->name == params[1])
 				{
 					currentGroup->materialIndex = i;
@@ -208,7 +208,7 @@ void OBJComponent::loadObjectFile(const std::string fileName, std::shared_ptr<Ob
 /**
 * Reads a material file
 */
-void OBJComponent::loadMaterialFile(const std::string& fileName, const std::string& dirName, std::shared_ptr<ObjectFile>& file, std::shared_ptr<ObjectBuilderContainer> context)
+void objectComponent::loadMaterialFile(const std::string& fileName, const std::string& dirName, std::shared_ptr<objectFile>& file, std::shared_ptr<ObjectBuilderContainer> context)
 {
 	std::cout << "Loading " << fileName << std::endl;
 	std::ifstream pFile(fileName.c_str());
@@ -218,7 +218,7 @@ void OBJComponent::loadMaterialFile(const std::string& fileName, const std::stri
 		return;
 	}
 
-	std::shared_ptr<MaterialInfo> currentMaterial = NULL;
+	std::shared_ptr<materialInfo> currentMaterial = NULL;
 
 	while (!pFile.eof())
 	{
@@ -237,7 +237,7 @@ void OBJComponent::loadMaterialFile(const std::string& fileName, const std::stri
 			{
 				file->materials.push_back(currentMaterial);
 			}
-			currentMaterial = std::make_shared<MaterialInfo>();
+			currentMaterial = std::make_shared<materialInfo>();
 			currentMaterial->name = params[1];
 		}
 		else if (params[0] == "map_kd")
@@ -289,7 +289,7 @@ void OBJComponent::loadMaterialFile(const std::string& fileName, const std::stri
 
 ///////////////////////////////////// Functions accesable for the outside. //////////////////////////////////////
 
-OBJComponent::OBJComponent(const std::string& fileName)
+objectComponent::objectComponent(const std::string& fileName)
 {
 	// If in cache
 	cachedObjectsLock.lock();
@@ -302,7 +302,7 @@ OBJComponent::OBJComponent(const std::string& fileName)
 
 	// Starting async loading process
 	std::shared_ptr<ObjectBuilderContainer> build = std::make_shared<ObjectBuilderContainer>();
-	std::thread thread(&OBJComponent::loadObjectFile, this, fileName, build, 0);
+	std::thread thread(&objectComponent::loadObjectFile, this, fileName, build, 0);
 
 	// Starting process
 	buildQueueLock.lock();
@@ -311,15 +311,15 @@ OBJComponent::OBJComponent(const std::string& fileName)
 	thread.detach();
 }
 
-OBJComponent::~OBJComponent()
+objectComponent::~objectComponent()
 {
 }
 
-void OBJComponent::draw()
+void objectComponent::draw()
 {
 	if (objectData != nullptr) {
 		// Looping through list of obj-groups
-		for (std::shared_ptr<ObjectGroup> group : objectData->groups) {
+		for (std::shared_ptr<objectGroup> group : objectData->groups) {
 			if (objectData->materials.at(group->materialIndex)->texture != nullptr) {
 				// Enabling textures because standard disabled
 				tigl::shader->enableTexture(true);
@@ -337,7 +337,7 @@ void OBJComponent::draw()
 
 /////////////////////////////// Multitheaded loading stuff ////////////////////////////////////////
 
-tigl::VBO* OBJComponent::ObjectBuilderContainer::asyncObjectVBOCall(std::vector<tigl::Vertex> vertices)
+tigl::VBO* objectComponent::ObjectBuilderContainer::asyncObjectVBOCall(std::vector<tigl::Vertex> vertices)
 {
 	buildLock.lock();
 	vboResponse = nullptr;
@@ -362,7 +362,7 @@ tigl::VBO* OBJComponent::ObjectBuilderContainer::asyncObjectVBOCall(std::vector<
 	}
 }
 
-std::shared_ptr<textureComponent> OBJComponent::ObjectBuilderContainer::asyncObjectTextureCall(std::string path)
+std::shared_ptr<textureComponent> objectComponent::ObjectBuilderContainer::asyncObjectTextureCall(std::string path)
 {
 	buildLock.lock();
 	textureResponse = nullptr;

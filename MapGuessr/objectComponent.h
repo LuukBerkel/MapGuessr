@@ -17,7 +17,7 @@
 #define GL_CALLS_HANDLE_AMOUNT 10
 
 
-class OBJComponent : public drawComponent {
+class objectComponent : public drawComponent {
 private:
 	// Animation data
 	float animationDelay = 0;
@@ -25,7 +25,7 @@ private:
 	int animationIndex = 0;
 
 	// This holds the vertices.
-	class ObjectGroup {
+	class objectGroup {
 	public:
 		std::string name;					// Object group name
 		tigl::VBO* bufferedObjectVertices;	// List of vertices
@@ -33,9 +33,9 @@ private:
 	};
 
 	// Holds the texture data.
-	class MaterialInfo {
+	class materialInfo {
 	public:
-		MaterialInfo();
+		materialInfo();
 		std::string name;
 		std::shared_ptr<textureComponent> texture;
 		glm::vec4 specular;
@@ -45,11 +45,11 @@ private:
 
 public:
 	// Holds a object file
-	class ObjectFile {
+	class objectFile {
 	public:
 		// Holds the object
-		std::vector<std::shared_ptr<ObjectGroup>> groups;
-		std::vector<std::shared_ptr<MaterialInfo>> materials;
+		std::vector<std::shared_ptr<objectGroup>> groups;
+		std::vector<std::shared_ptr<materialInfo>> materials;
 		int animationIndex;
 	};
 
@@ -77,31 +77,30 @@ public:
 	};
 
 private:
-	
 	// Holds the information about the object
-	std::shared_ptr<ObjectFile> objectData = nullptr;
+	std::shared_ptr<objectFile> objectData = nullptr;
 
 	// Loads in the texture data.
 	void loadObjectFile(const std::string fileName, std::shared_ptr<ObjectBuilderContainer> context, int listIndex);
-	void loadMaterialFile(const std::string& fileName, const std::string& dirName, std::shared_ptr<ObjectFile>& file, std::shared_ptr<ObjectBuilderContainer> context);
+	void loadMaterialFile(const std::string& fileName, const std::string& dirName, std::shared_ptr<objectFile>& file, std::shared_ptr<ObjectBuilderContainer> context);
 public:
 	/**
 	 * @brief This method loads object model on a async thread.
 	 * @param fileName The filename and path from run directory if needed for the object file.
 	 * @param loaded This is a pointer that says wether a file is loaded in chache or not.
 	*/
-	OBJComponent(const std::string& fileName);
-	~OBJComponent();
+	objectComponent(const std::string& fileName);
+	~objectComponent();
 
 	virtual void draw() override;
 };
 
 // Global private caching map.
-static std::map<std::string, std::shared_ptr<OBJComponent::ObjectFile>> cachedObjects;
+static std::map<std::string, std::shared_ptr<objectComponent::objectFile>> cachedObjects;
 static std::mutex cachedObjectsLock;
 
 // Holds the amount of working threads.
-static std::queue<std::shared_ptr<OBJComponent::ObjectBuilderContainer>> buildQueue;
+static std::queue<std::shared_ptr<objectComponent::ObjectBuilderContainer>> buildQueue;
 static std::mutex buildQueueLock;
 
 // Loads the objects and is called once every cycle.

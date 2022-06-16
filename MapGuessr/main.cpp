@@ -66,7 +66,13 @@ int main(void)
 	// Rendering time...
 	while (!glfwWindowShouldClose(window))
 	{
+		// Checks if there are any gl calls available.
+		loadObjectIterate();
+
+		// Updates the motion and physics.
 		update();
+
+		// Drawing en showing on window
 		draw();
 		glfwSwapBuffers(window);
 		glfwPollEvents();
