@@ -78,6 +78,8 @@ objectComponent::materialInfo::materialInfo()
 }
 
 
+///////////////////////////////////////////////// Parsing functions /////////////////////////////////////////////////////////////////
+
 /*Loads the objectfile and adds it to the list of objects for the animation*/
 void objectComponent::loadObjectFile(const std::string fileName, std::shared_ptr<ObjectBuilderContainer> context, int listIndex)
 {
@@ -164,7 +166,7 @@ void objectComponent::loadObjectFile(const std::string fileName, std::shared_ptr
 		else if (params[0] == "usemtl")
 		{
 			if (renderData.size() > 0) {
-				currentGroup->bufferedObjectVertices = context->asyncObjectVBOCall(renderData);
+				currentGroup->bufferedObjectVertices = context->asyncObjectVBOCall(renderData, context);
 				if (currentGroup->bufferedObjectVertices != nullptr) {
 					file->groups.push_back(currentGroup);
 					renderData.clear();
@@ -189,7 +191,7 @@ void objectComponent::loadObjectFile(const std::string fileName, std::shared_ptr
 	}
 
 	if (renderData.size() > 0) {
-		currentGroup->bufferedObjectVertices = context->asyncObjectVBOCall(renderData);
+		currentGroup->bufferedObjectVertices = context->asyncObjectVBOCall(renderData, context);
 		if (currentGroup->bufferedObjectVertices != nullptr) {
 			file->groups.push_back(currentGroup);
 			renderData.clear();
@@ -203,6 +205,8 @@ void objectComponent::loadObjectFile(const std::string fileName, std::shared_ptr
 	cachedObjectsLock.lock();
 	cachedObjects.insert({ fileName, objectData });
 	cachedObjectsLock.unlock();
+
+	std::cout << "Object loaded succesfully" << std::endl;
 }
 
 /**
@@ -248,7 +252,7 @@ void objectComponent::loadMaterialFile(const std::string& fileName, const std::s
 			if (tex.find("\\"))
 				tex = tex.substr(tex.rfind("\\") + 1);
 			if (currentMaterial != NULL) {
-				currentMaterial->texture = context->asyncObjectTextureCall(dirName + "/" + tex);
+				currentMaterial->texture = context->asyncObjectTextureCall(dirName + "/" + tex, context);
 			}
 		}
 		else if (params[0] == "kd")
@@ -305,9 +309,6 @@ objectComponent::objectComponent(const std::string& fileName)
 	std::thread thread(&objectComponent::loadObjectFile, this, fileName, build, 0);
 
 	// Starting process
-	buildQueueLock.lock();
-	buildQueue.emplace(build);
-	buildQueueLock.unlock();
 	thread.detach();
 }
 
@@ -335,9 +336,9 @@ void objectComponent::draw()
 	}
 }
 
-/////////////////////////////// Multitheaded loading stuff ////////////////////////////////////////
+/////////////////////////////// Multitheaded loading requests to gl thread ////////////////////////////////////////
 
-tigl::VBO* objectComponent::ObjectBuilderContainer::asyncObjectVBOCall(std::vector<tigl::Vertex> vertices)
+tigl::VBO* objectComponent::ObjectBuilderContainer::asyncObjectVBOCall(std::vector<tigl::Vertex> vertices, std::shared_ptr<ObjectBuilderContainer> context)
 {
 	buildLock.lock();
 	vboResponse = nullptr;
@@ -345,7 +346,13 @@ tigl::VBO* objectComponent::ObjectBuilderContainer::asyncObjectVBOCall(std::vect
 	inputGiven = true;
 	outputGiven = false;
 	operation = 0;
+
 	buildLock.unlock();
+
+	buildQueueLock.lock();
+	buildQueue.emplace(context);
+	buildQueueLock.unlock();
+
 
 	while (true) {
 		buildLock.lock();
@@ -362,7 +369,7 @@ tigl::VBO* objectComponent::ObjectBuilderContainer::asyncObjectVBOCall(std::vect
 	}
 }
 
-std::shared_ptr<textureComponent> objectComponent::ObjectBuilderContainer::asyncObjectTextureCall(std::string path)
+std::shared_ptr<textureComponent> objectComponent::ObjectBuilderContainer::asyncObjectTextureCall(std::string path, std::shared_ptr<ObjectBuilderContainer> context)
 {
 	buildLock.lock();
 	textureResponse = nullptr;
@@ -371,6 +378,10 @@ std::shared_ptr<textureComponent> objectComponent::ObjectBuilderContainer::async
 	outputGiven = false;
 	operation = 1;
 	buildLock.unlock();
+
+	buildQueueLock.lock();
+	buildQueue.emplace(context);
+	buildQueueLock.unlock();
 
 	while (true) {
 		buildLock.lock();
@@ -387,12 +398,14 @@ std::shared_ptr<textureComponent> objectComponent::ObjectBuilderContainer::async
 	}
 }
 
+//////////////////////////////////////////// Routine function called every update to load stuff /////////////////////////////
+
 void loadObjectIterate()
 {
 	buildQueueLock.lock();
 	for (int i = 0; i < GL_CALLS_HANDLE_AMOUNT; i++){
 		// Performance guard if empty.
-		if (buildQueue.front() == nullptr) {
+		if (buildQueue.empty()) {
 			buildQueueLock.unlock();
 			return;
 		}
@@ -416,5 +429,6 @@ void loadObjectIterate()
 		buildQueue.front()->buildLock.unlock();
 		buildQueue.pop();
 	}
+
 	buildQueueLock.unlock();
 }

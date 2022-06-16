@@ -1,7 +1,7 @@
 #pragma once
 #include "gameComponent.h"
 
-class drawComponent : gameComponent {
+class drawComponent : public gameComponent {
 public:
 	drawComponent();
 	~drawComponent();

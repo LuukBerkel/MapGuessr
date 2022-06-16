@@ -161,6 +161,7 @@
   <ItemGroup>
     <ClCompile Include="drawComponent.cpp" />
     <ClCompile Include="floorComponent.cpp" />
+    <ClCompile Include="fpsCamera.cpp" />
     <ClCompile Include="gameComponent.cpp" />
     <ClCompile Include="gameObject.cpp" />
     <ClCompile Include="main.cpp" />
@@ -171,6 +172,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="drawComponent.h" />
+    <ClInclude Include="fpsCamera.h" />
     <ClInclude Include="gameComponent.h" />
     <ClInclude Include="floorComponent.h" />
     <ClInclude Include="gameObject.h" />

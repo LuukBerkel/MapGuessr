@@ -26,6 +26,9 @@
     <ClCompile Include="gameObject.cpp">
       <Filter>graphics\logic</Filter>
     </ClCompile>
+    <ClCompile Include="fpsCamera.cpp">
+      <Filter>graphics\logic</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="libraries">
@@ -76,6 +79,9 @@
       <Filter>graphics\components\interfaces</Filter>
     </ClInclude>
     <ClInclude Include="gameObject.h">
+      <Filter>graphics\logic</Filter>
+    </ClInclude>
+    <ClInclude Include="fpsCamera.h">
       <Filter>graphics\logic</Filter>
     </ClInclude>
   </ItemGroup>

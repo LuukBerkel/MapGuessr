@@ -27,9 +27,9 @@ private:
 	// This holds the vertices.
 	class objectGroup {
 	public:
-		std::string name;					// Object group name
-		tigl::VBO* bufferedObjectVertices;	// List of vertices
-		int materialIndex;					// Index for the texture file
+		std::string name;					
+		tigl::VBO* bufferedObjectVertices;	
+		int materialIndex;					
 	};
 
 	// Holds the texture data.
@@ -56,8 +56,8 @@ public:
 	// Object that is created when building to communicate with gl thread.
 	class ObjectBuilderContainer {
 	public:
-		tigl::VBO* asyncObjectVBOCall(std::vector<tigl::Vertex> vertices);
-		std::shared_ptr<textureComponent> asyncObjectTextureCall(std::string path);
+		tigl::VBO* asyncObjectVBOCall(std::vector<tigl::Vertex> vertices, std::shared_ptr<ObjectBuilderContainer> context);
+		std::shared_ptr<textureComponent> asyncObjectTextureCall(std::string path, std::shared_ptr<ObjectBuilderContainer> context);
 
 		// Used for operation safety on objects.
 		std::mutex buildLock;
