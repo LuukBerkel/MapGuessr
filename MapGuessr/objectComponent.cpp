@@ -112,6 +112,8 @@ void objectComponent::loadObjectFile(const std::string fileName)
 	std::vector<glm::vec2> texcoords;
 	std::vector<tigl::Vertex> renderData;
 	std::shared_ptr<objectFile> file = std::make_shared<objectFile>();
+	objectData = file;
+
 
 	while (!pFile.eof())
 	{
@@ -169,7 +171,9 @@ void objectComponent::loadObjectFile(const std::string fileName)
 				std::shared_ptr<ObjectBuilderContainer> context = std::make_shared<ObjectBuilderContainer>();
 				currentGroup->bufferedObjectVertices = context->asyncObjectVBOCall(renderData, context);
 				if (currentGroup->bufferedObjectVertices != nullptr) {
+					objectDataWriteLock.lock();
 					file->groups.push_back(currentGroup);
+					objectDataWriteLock.unlock();
 					renderData.clear();
 				}
 			}
@@ -195,13 +199,14 @@ void objectComponent::loadObjectFile(const std::string fileName)
 		std::shared_ptr<ObjectBuilderContainer> context = std::make_shared<ObjectBuilderContainer>();
 		currentGroup->bufferedObjectVertices = context->asyncObjectVBOCall(renderData, context);
 		if (currentGroup->bufferedObjectVertices != nullptr) {
+			objectDataWriteLock.lock();
 			file->groups.push_back(currentGroup);
+			objectDataWriteLock.unlock();
 			renderData.clear();
 		}
 	}
 
 	// File is done
-	objectData = file;
 
 	// Adding it to cache
 	cachedObjectsLock.lock();
@@ -241,7 +246,9 @@ void objectComponent::loadMaterialFile(const std::string& fileName, const std::s
 		{
 			if (currentMaterial != NULL)
 			{
+				objectDataWriteLock.lock();
 				file->materials.push_back(currentMaterial);
+				objectDataWriteLock.unlock();
 			}
 			currentMaterial = std::make_shared<materialInfo>();
 			currentMaterial->name = params[1];
@@ -308,7 +315,7 @@ objectComponent::objectComponent(const std::string& fileName)
 	cachedObjectsLock.unlock();
 
 	// Starting async loading process
-	std::thread thread(&objectComponent::loadObjectFile, this, fileName, 0);
+	std::thread thread(&objectComponent::loadObjectFile, this, fileName);
 
 	// Starting process
 	thread.detach();
@@ -321,17 +328,25 @@ objectComponent::~objectComponent()
 void objectComponent::draw()
 {
 	if (objectData != nullptr) {
+		// Write protection for object groups in for loops..
+		objectDataWriteLock.lock();
+
 		// Looping through list of obj-groups
 		for (std::shared_ptr<objectGroup> group : objectData->groups) {
-			if (objectData->materials.at(group->materialIndex)->texture != nullptr) {
-				// Enabling textures because standard disabled
-				tigl::shader->enableTexture(true);
-				objectData->materials.at(group->materialIndex)->texture->get()->bind();
+			if (group != nullptr) {
+				if (objectData->materials.size() >= group->materialIndex && objectData->materials.at(group->materialIndex)->texture != nullptr) {
+					// Enabling textures because standard disabled
+					tigl::shader->enableTexture(true);
+					objectData->materials.at(group->materialIndex)->texture->bind();
+				}
+				if (*group->bufferedObjectVertices != nullptr)
+					tigl::drawVertices(GL_TRIANGLES, *group->bufferedObjectVertices);
+				tigl::shader->enableTexture(false);
 			}
-			if (*group->bufferedObjectVertices != nullptr)
-				tigl::drawVertices(GL_TRIANGLES, *group->bufferedObjectVertices);
-			tigl::shader->enableTexture(false);
 		}
+
+		// Disabling write protection 
+		objectDataWriteLock.unlock();
 
 		// Disabling textures else components with colors will get textures
 		tigl::shader->enableTexture(false);
@@ -358,9 +373,9 @@ std::shared_ptr<tigl::VBO*> objectComponent::ObjectBuilderContainer::asyncObject
 	return vbo;
 }
 
-std::shared_ptr<std::shared_ptr<textureComponent>> objectComponent::ObjectBuilderContainer::asyncObjectTextureCall(std::string path, std::shared_ptr<ObjectBuilderContainer> context)
+std::shared_ptr<textureComponent> objectComponent::ObjectBuilderContainer::asyncObjectTextureCall(std::string path, std::shared_ptr<ObjectBuilderContainer> context)
 {
-	std::shared_ptr<std::shared_ptr<textureComponent>> tex = std::make_shared<std::shared_ptr<textureComponent>>();
+	std::shared_ptr<textureComponent> tex = nullptr;
 
 	buildLock.lock();
 	textureResponse = tex;
@@ -381,6 +396,7 @@ std::shared_ptr<std::shared_ptr<textureComponent>> objectComponent::ObjectBuilde
 void loadObjectIterate()
 {
 	buildQueueLock.lock();
+	//std::cout << "build queue size: " << buildQueue.size() << std::endl;
 	for (int i = 0; i < GL_CALLS_HANDLE_AMOUNT; i++){
 		// Performance guard if empty.
 		if (buildQueue.empty()) {
@@ -397,7 +413,7 @@ void loadObjectIterate()
 			}
 			else if (buildQueue.front()->operation == 1)
 			{
-				*buildQueue.front()->textureResponse = std::make_shared<textureComponent>(buildQueue.front()->pathRequest);
+				buildQueue.front()->textureResponse = std::make_shared<textureComponent>(buildQueue.front()->pathRequest);
 			
 			}
 		}

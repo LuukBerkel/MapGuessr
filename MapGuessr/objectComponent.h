@@ -14,7 +14,7 @@
 #include <mutex>
 #include <map>
 
-#define GL_CALLS_HANDLE_AMOUNT 300
+#define GL_CALLS_HANDLE_AMOUNT 500
 
 
 class objectComponent : public drawComponent {
@@ -37,7 +37,7 @@ private:
 	public:
 		materialInfo();
 		std::string name;
-		std::shared_ptr<std::shared_ptr<textureComponent>> texture;
+		std::shared_ptr<textureComponent> texture;
 		glm::vec4 specular;
 		glm::vec4 ambient;
 		glm::vec4 diffuse;
@@ -57,7 +57,7 @@ public:
 	class ObjectBuilderContainer {
 	public:
 		std::shared_ptr<tigl::VBO*> asyncObjectVBOCall(std::vector<tigl::Vertex> vertices, std::shared_ptr<ObjectBuilderContainer> context);
-		std::shared_ptr<std::shared_ptr<textureComponent>> asyncObjectTextureCall(std::string path, std::shared_ptr<ObjectBuilderContainer> context);
+		std::shared_ptr<textureComponent> asyncObjectTextureCall(std::string path, std::shared_ptr<ObjectBuilderContainer> context);
 
 		// Used for operation safety on objects.
 		std::mutex buildLock;
@@ -72,12 +72,13 @@ public:
 
 		// Used for texure create calls.
 		std::string pathRequest;
-		std::shared_ptr<std::shared_ptr<textureComponent>> textureResponse;
+		std::shared_ptr<textureComponent> textureResponse;
 	};
 
 private:
 	// Holds the information about the object
 	std::shared_ptr<objectFile> objectData = nullptr;
+	std::mutex objectDataWriteLock;
 
 	// Loads in the texture data.
 	void loadObjectFile(const std::string fileName);
