@@ -14,6 +14,9 @@
 #include <mutex>
 #include <map>
 
+/*This class is an object holder. This means it holds objects and can draw them.
+  It also streams them in so you can already draw a part that is loaded and the rest will stream in gradually*/
+
 #define GL_CALLS_HANDLE_AMOUNT 500
 
 
