@@ -30,7 +30,7 @@ void init()
 	object = new gameObject();
 	object->scale = glm::vec3(0.001f);
 	object->position = glm::vec3(0.0f);
-	object->addComponent(std::make_shared<objectComponent>("resources/car/honda_jazz.obj"));
+	object->addComponent(std::make_shared<objectComponent>("resources/plane/11803_Airplane_v1_l1.obj"));
 }
 
 void update()

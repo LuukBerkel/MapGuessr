@@ -332,7 +332,7 @@ void objectComponent::draw()
 		// Looping through list of obj-groups
 		for (std::shared_ptr<objectGroup> group : objectData->groups) {
 			if (group != nullptr) {
-				if (objectData->materials.at(group->materialIndex)->texture->get() != nullptr) {
+				if (group->materialIndex < objectData->materials.size() && objectData->materials.at(group->materialIndex)->texture != nullptr && objectData->materials.at(group->materialIndex)->texture->get() != nullptr) {
 					// Enabling textures because standard disabled
 					tigl::shader->enableTexture(true);
 					objectData->materials.at(group->materialIndex)->texture->get()->bind();

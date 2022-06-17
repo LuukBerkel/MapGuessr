@@ -178,11 +178,14 @@
     <ClInclude Include="gameComponent.h" />
     <ClInclude Include="floorComponent.h" />
     <ClInclude Include="gameObject.h" />
+    <ClInclude Include="gameTile.h" />
     <ClInclude Include="objectComponent.h" />
     <ClInclude Include="playerComponent.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="textureComponent.h" />
     <ClInclude Include="tigl.h" />
+    <ClInclude Include="tileCacher.h" />
+    <ClInclude Include="tileParser.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
