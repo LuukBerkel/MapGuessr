@@ -246,9 +246,7 @@ void objectComponent::loadMaterialFile(const std::string& fileName, const std::s
 		{
 			if (currentMaterial != NULL)
 			{
-				objectDataWriteLock.lock();
 				file->materials.push_back(currentMaterial);
-				objectDataWriteLock.unlock();
 			}
 			currentMaterial = std::make_shared<materialInfo>();
 			currentMaterial->name = params[1];
@@ -334,10 +332,10 @@ void objectComponent::draw()
 		// Looping through list of obj-groups
 		for (std::shared_ptr<objectGroup> group : objectData->groups) {
 			if (group != nullptr) {
-				if (objectData->materials.size() >= group->materialIndex && objectData->materials.at(group->materialIndex)->texture != nullptr) {
+				if (objectData->materials.at(group->materialIndex)->texture->get() != nullptr) {
 					// Enabling textures because standard disabled
 					tigl::shader->enableTexture(true);
-					objectData->materials.at(group->materialIndex)->texture->bind();
+					objectData->materials.at(group->materialIndex)->texture->get()->bind();
 				}
 				if (*group->bufferedObjectVertices != nullptr)
 					tigl::drawVertices(GL_TRIANGLES, *group->bufferedObjectVertices);
@@ -373,9 +371,9 @@ std::shared_ptr<tigl::VBO*> objectComponent::ObjectBuilderContainer::asyncObject
 	return vbo;
 }
 
-std::shared_ptr<textureComponent> objectComponent::ObjectBuilderContainer::asyncObjectTextureCall(std::string path, std::shared_ptr<ObjectBuilderContainer> context)
+std::shared_ptr<std::shared_ptr<textureComponent>> objectComponent::ObjectBuilderContainer::asyncObjectTextureCall(std::string path, std::shared_ptr<ObjectBuilderContainer> context)
 {
-	std::shared_ptr<textureComponent> tex = nullptr;
+	std::shared_ptr<std::shared_ptr<textureComponent>> tex = std::make_shared<std::shared_ptr<textureComponent>>();
 
 	buildLock.lock();
 	textureResponse = tex;
@@ -413,7 +411,8 @@ void loadObjectIterate()
 			}
 			else if (buildQueue.front()->operation == 1)
 			{
-				buildQueue.front()->textureResponse = std::make_shared<textureComponent>(buildQueue.front()->pathRequest);
+				*buildQueue.front()->textureResponse = std::make_shared<textureComponent>(buildQueue.front()->pathRequest);
+				std::cout << buildQueue.front()->pathRequest << std::endl;
 			
 			}
 		}

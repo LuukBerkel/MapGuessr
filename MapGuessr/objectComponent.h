@@ -40,7 +40,7 @@ private:
 	public:
 		materialInfo();
 		std::string name;
-		std::shared_ptr<textureComponent> texture;
+		std::shared_ptr<std::shared_ptr<textureComponent>> texture;
 		glm::vec4 specular;
 		glm::vec4 ambient;
 		glm::vec4 diffuse;
@@ -60,7 +60,7 @@ public:
 	class ObjectBuilderContainer {
 	public:
 		std::shared_ptr<tigl::VBO*> asyncObjectVBOCall(std::vector<tigl::Vertex> vertices, std::shared_ptr<ObjectBuilderContainer> context);
-		std::shared_ptr<textureComponent> asyncObjectTextureCall(std::string path, std::shared_ptr<ObjectBuilderContainer> context);
+		std::shared_ptr<std::shared_ptr<textureComponent>> asyncObjectTextureCall(std::string path, std::shared_ptr<ObjectBuilderContainer> context);
 
 		// Used for operation safety on objects.
 		std::mutex buildLock;
@@ -75,7 +75,7 @@ public:
 
 		// Used for texure create calls.
 		std::string pathRequest;
-		std::shared_ptr<textureComponent> textureResponse;
+		std::shared_ptr<std::shared_ptr<textureComponent>> textureResponse;
 	};
 
 private:
