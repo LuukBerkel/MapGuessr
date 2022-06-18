@@ -79,7 +79,7 @@ static bool calculateIntersect(glm::vec2 incoming[3], tileBuilder::tileZone zone
 				return false;
 			}
 
-			// Todo fix non-convex bug grrrrrrrrrrrrrrrrrrrrrrrrrrrr............
+			if ()
 
 
 
@@ -96,8 +96,6 @@ static bool calculateIntersect(glm::vec2 incoming[3], tileBuilder::tileZone zone
 
 	return true;
 }
-
-
 
 
 

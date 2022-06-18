@@ -67,8 +67,7 @@ std::shared_ptr<tileBuilder::tileData> tileCollector::collectTileDataInternet(gl
 	
 	// Parsing water
 	res = collectFromAPI(water.str());
-	//parseData(res, location, data);
-
+	//parseData(res, location, data)
 	//// Building request string...
 	//std::stringstream road;
 	//road << "data=%5Bbbox%3A" << std::fixed << std::setprecision(15) << location.x << "%2C" << location.y << "%2C" << location.z << "%2C" << location.w << "%5D%3B%0Anwr%20%5B%22highway%22%5D%3B%0Aout%20geom%3B";
