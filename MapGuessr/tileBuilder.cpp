@@ -2,6 +2,13 @@
 #include "floorComponent.h"
 #include <thread>
 
+#include "tileCollector.h";
+
+tileBuilder::tileBuilder()
+{
+	collector = new tileCollector();
+}
+
 std::shared_ptr <gameTile> tileBuilder::collectTile(glm::vec4 location)
 {
 	std::shared_ptr<gameTile> tile = std::make_shared<gameTile>();
@@ -18,15 +25,12 @@ std::shared_ptr <gameTile> tileBuilder::collectTile(glm::vec4 location)
 	return tile;
 }
 
-tileBuilder::tileBuilder()
-{
-	collector = tileCollector();
-}
+
 
 void tileBuilder::collectTileAsync(glm::vec4 location, std::shared_ptr<gameTile> tile)
 {
 	// Collecting from the internet...
-	std::shared_ptr<tileBuilder::tileData> data = collector.collectTileDataInternet(location);
+	std::shared_ptr<tileBuilder::tileData> data = collector->collectTileDataInternet(location);
 
 	// Adding some objects for some sphere in my game...
 
@@ -42,7 +46,7 @@ void tileBuilder::collectTileAsync(glm::vec4 location, std::shared_ptr<gameTile>
 	}
 
 	// Setting gameposition
-	tile = std::make_shared<gameTile>(objects);
+	tile->addObjects(objects);
 	tile->worldPosition = location;
 	tile->gamePosition = glm::vec3(0.0f);
 

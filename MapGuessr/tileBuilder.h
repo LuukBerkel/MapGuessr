@@ -3,10 +3,12 @@
 #include <glm/glm.hpp>
 #include <vector>
 #include <memory>
-#include "tileCollector.h"
+#include "gameTile.h"
+
+class tileCollector;
 
 class tileBuilder {
-public: 
+public:
 	// This holds the differend terraintypes available to render
 	enum class zoneType {
 		GRASS,
@@ -34,14 +36,21 @@ public:
 		std::vector<tileZone> data;
 	};
 
-	std::shared_ptr <gameTile> collectTile(glm::vec4 location);
-
 	tileBuilder();
 
 private:
-	tileCollector collector;
+	tileCollector* collector;
+
+	std::shared_ptr<gameTile> collectTile(glm::vec4 location);
+
 	void collectTileAsync(glm::vec4 location, std::shared_ptr<gameTile> tile);
+
 	bool checkCache(glm::vec4 location);
+
 	void collectCacheAsync(glm::vec4 location, std::shared_ptr<gameTile> tile);
+
 	void addCache(std::shared_ptr<gameTile> tile);
+
 };
+
+

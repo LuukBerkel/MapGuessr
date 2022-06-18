@@ -16,7 +16,6 @@ GLFWwindow* window;
 fpsCamera* camera;
 gameObject* object;
 
-std::shared_ptr<gameTile> tile;
 
 void init()
 {
@@ -65,7 +64,6 @@ void draw()
 
 	glEnable(GL_DEPTH_TEST);
 
-	tile->draw();
 }
 
 

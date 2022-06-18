@@ -3,6 +3,8 @@
 #include "gameTile.h"
 #include <memory>
 
+
+
 class tileCollector {
 	// This class holds all the methods of caching and collecting tile data
 public:
