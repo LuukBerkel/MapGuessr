@@ -19,6 +19,12 @@ static glm::vec4 collectColor(tileBuilder::zoneType type) {
 	if (type == tileBuilder::zoneType::FOREST) {
 		return glm::vec4(0.0f, 0.7f, 0.0f, 1.0f);
 	}
+	if (type == tileBuilder::zoneType::WATER) {
+		return glm::vec4(0, 0, 1, 1);
+	}
+	if (type == tileBuilder::zoneType::ROAD) {
+		return glm::vec4(0, 0, 0, 1);
+	}
 	return glm::vec4(1, 1, 1, 1);
 }
 

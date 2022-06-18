@@ -11,7 +11,7 @@
 #define ERROR_MESSAGE_LENGTH 593
 
 static tileBuilder::zoneType checkZoneType(rapidxml::xml_node<>* tag_node);
-static std::shared_ptr<tileBuilder::tileData> parseData(std::string& incoming, glm::vec4 location);
+static std::shared_ptr<tileBuilder::tileData> parseData(std::string& incoming, glm::vec4 location, std::shared_ptr<tileBuilder::tileData> data);
 
 size_t writeCallback(char* contents, size_t size, size_t nmemb, void* userp)
 {
@@ -19,14 +19,11 @@ size_t writeCallback(char* contents, size_t size, size_t nmemb, void* userp)
 	return size * nmemb;
 }
 
-
-std::shared_ptr<tileBuilder::tileData> tileCollector::collectTileDataInternet(glm::vec4& location)
-{
+static std::string collectFromAPI(std::string input) {
 	// Setting up curl
 	CURL* curl;
 	std::string rawData;
 	curl = curl_easy_init();
-
 	// If setup then start setting up request and sending it.
 	if (curl) {
 		curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
@@ -37,14 +34,8 @@ std::shared_ptr<tileBuilder::tileData> tileCollector::collectTileDataInternet(gl
 		headers = curl_slist_append(headers, "Content-Type: application/x-www-form-urlencoded");
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-		// Building request string...
-		std::stringstream sstream;
-		sstream << "data=%5Bbbox%3A" << std::fixed << std::setprecision(15) << location.x << "%2C" << location.y << "%2C" << location.z << "%2C" << location.w << "%5D%3B%0Anwr%20%5Blanduse%5D%3B%0Aout%20geom%3B";
-		std::cout << sstream.str().c_str() << std::endl;
-
 		// Conversion to C char pointer
-		std::string dataString = sstream.str();
-		const char* dataCharPTR = dataString.c_str();
+		const char* dataCharPTR = input.c_str();
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, dataCharPTR);
 
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
@@ -54,20 +45,41 @@ std::shared_ptr<tileBuilder::tileData> tileCollector::collectTileDataInternet(gl
 	}
 	curl_easy_cleanup(curl);
 
-	// Dirty manner of checking wether or not the server send an error back.
-	if (rawData.size() == ERROR_MESSAGE_LENGTH) {
-		std::cout << "Error is send back )-;" << std::endl;
-		return nullptr;
-	}
-
-	std::cout << "received shit" << std::endl;
-
-	return parseData(rawData, location);
+	return rawData;
 }
 
-static std::shared_ptr<tileBuilder::tileData> parseData(std::string& incoming, glm::vec4 location) {
-	// Creating object for saving data
+std::shared_ptr<tileBuilder::tileData> tileCollector::collectTileDataInternet(glm::vec4& location)
+{
+	// Creating a raii pointer to the data loaded.
 	std::shared_ptr<tileBuilder::tileData> data = std::make_shared<tileBuilder::tileData>();
+
+	// Building request string...
+	std::stringstream landuse;
+	landuse << "data=%5Bbbox%3A" << std::fixed << std::setprecision(15) << location.x << "%2C" << location.y << "%2C" << location.z << "%2C" << location.w << "%5D%3B%0Anwr%20%5Blanduse%5D%3B%0Aout%20geom%3B";
+
+	// Parsing landusage
+	std::string res = collectFromAPI(landuse.str());
+	parseData(res, location, data);
+
+	// Building request string...
+	std::stringstream water;
+	water << "data=%5Bbbox%3A" << std::fixed << std::setprecision(15) << location.x << "%2C" << location.y << "%2C" << location.z << "%2C" << location.w << "%5D%3B%0Anwr%20%5B%22natural%22%3D%22water%22%5D%3B%0Aout%20geom%3B";
+	
+	// Parsing water
+	res = collectFromAPI(water.str());
+	//parseData(res, location, data);
+
+	//// Building request string...
+	//std::stringstream road;
+	//road << "data=%5Bbbox%3A" << std::fixed << std::setprecision(15) << location.x << "%2C" << location.y << "%2C" << location.z << "%2C" << location.w << "%5D%3B%0Anwr%20%5B%22highway%22%5D%3B%0Aout%20geom%3B";
+
+	//// Parsing roads
+	//res = collectFromAPI(road.str());
+	return parseData(res, location, data);
+}
+
+static std::shared_ptr<tileBuilder::tileData> parseData(std::string& incoming, glm::vec4 location, std::shared_ptr<tileBuilder::tileData> data) {
+	std::cout << incoming << std::endl;
 
 	// Parsing response data
 	rapidxml::xml_document<> doc;
@@ -76,7 +88,7 @@ static std::shared_ptr<tileBuilder::tileData> parseData(std::string& incoming, g
 	// Find our root node
 	rapidxml::xml_node<>* root_node = doc.first_node("osm");
 
-	// Looping through all perimters.
+	// Looping through the data on the way manner
 	for (rapidxml::xml_node<>* perimter_node = root_node->first_node("way"); perimter_node; perimter_node = perimter_node->next_sibling())
 	{
 		tileBuilder::tileZone zone = tileBuilder::tileZone::tileZone();
@@ -89,13 +101,12 @@ static std::shared_ptr<tileBuilder::tileData> parseData(std::string& incoming, g
 			if (checkZoneType(tag_node) != tileBuilder::zoneType::EMPTY) {
 				zone.type = checkZoneType(tag_node);
 				terrainTypeLoaded = true;
+
 			}
 		}
 
 		// If no terrain type then ignore else execute loading perimeter
 		if (terrainTypeLoaded) {
-			perimter_node->first_node("tag")->first_attribute("v")->value();
-
 			// Parsing perimter
 			for (rapidxml::xml_node<>* coord_node = perimter_node->first_node("nd"); coord_node; coord_node = coord_node->next_sibling())
 			{
@@ -112,11 +123,49 @@ static std::shared_ptr<tileBuilder::tileData> parseData(std::string& incoming, g
 		}
 	}
 
+	// Looping through data on members and relations.
+	for (rapidxml::xml_node<>* relation_node = root_node->first_node("relation"); relation_node; relation_node = relation_node->next_sibling())
+	{
+		tileBuilder::tileZone zone = tileBuilder::tileZone::tileZone();
+		zone.type = tileBuilder::zoneType::EMPTY;
+
+		bool terrainTypeLoaded = false;
+
+		// Parsing terraintype
+		for (rapidxml::xml_node<>* tag_node = relation_node->first_node("tag"); tag_node; tag_node = tag_node->next_sibling()) {
+			if (checkZoneType(tag_node) != tileBuilder::zoneType::EMPTY) {
+				zone.type = checkZoneType(tag_node);
+				terrainTypeLoaded = true;
+
+			}
+		}
+
+		// If no terrain type then ignore else execute loading perimeter
+		if (terrainTypeLoaded) {
+			// Parsing perimter
+			for (rapidxml::xml_node<>* member_node = relation_node->first_node("member"); member_node; member_node = member_node->next_sibling()) {
+				for (rapidxml::xml_node<>* coord_node = member_node->first_node("nd"); coord_node; coord_node = coord_node->next_sibling())
+				{
+					if (coord_node->first_attribute("lat") != nullptr || coord_node->first_attribute("lon") != nullptr) {
+						float lat = (location.x - std::stof(coord_node->first_attribute("lat")->value()));
+						float lon = (location.y - std::stof(coord_node->first_attribute("lon")->value()));
+						lat *= 100;
+						lon *= 100;
+						zone.perimeter.push_back(glm::vec2(lat, lon));
+					}
+				}
+			}
+
+			data->data.push_back(zone);
+		}
+	}
+
 	return data;
 }
 
 static tileBuilder::zoneType checkZoneType(rapidxml::xml_node<>* tag_node) {
 	std::string value = std::string(tag_node->first_attribute("v")->value());
+	std::string key = std::string(tag_node->first_attribute("k")->value());
 	// First degree
 	if (value._Equal("commercial") || value._Equal("retail")) {
 		return tileBuilder::zoneType::COMMERCIAL;
@@ -132,6 +181,12 @@ static tileBuilder::zoneType checkZoneType(rapidxml::xml_node<>* tag_node) {
 	}
 	if (value._Equal("forest")) {
 		return tileBuilder::zoneType::FOREST;
+	}
+	if (value._Equal("water")) {
+		return tileBuilder::zoneType::WATER;
+	}
+	if (key._Equal("highway")) {
+		return tileBuilder::zoneType::ROAD;
 	}
 
 	return tileBuilder::zoneType::EMPTY;

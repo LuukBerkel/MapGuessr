@@ -15,6 +15,7 @@ public:
 		WATER,
 		COMMERCIAL,
 		FOODPROD,
+		ROAD,
 		EMPTY
 	};
 
