@@ -6,6 +6,7 @@
 #include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
 #include "fpsCamera.h"
+#include "floorComponent.h"
 
 #include "objectComponent.h"
 #include "tileCollector.h"
@@ -15,13 +16,10 @@ GLFWwindow* window;
 fpsCamera* camera;
 gameObject* object;
 
+std::shared_ptr<gameTile> tile;
+
 void init()
 {
-	glm::vec4 f(51.4649882, -0.089, 51.5457077, 0.079);
-	tileCollector col = tileCollector();
-	col.collectTileDataInternet(f);
-
-
 	tigl::init();
 	glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
 		{
@@ -33,22 +31,37 @@ void init()
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	tigl::shader->enableLighting(true);
+	/*tigl::shader->enableLighting(true);
 	tigl::shader->setLightCount(1);
 	tigl::shader->setLightDirectional(0, true);
 	tigl::shader->setLightPosition(0, (glm::vec3(0, 7, 12)));
 	tigl::shader->setLightAmbient(0, glm::vec3(0.5f, 0.5f, 0.5f));
 	tigl::shader->setLightDiffuse(0, glm::vec3(0.5f, 0.5f, 0.5f));
 	tigl::shader->setLightSpecular(0, glm::vec3(1, 1, 1));
-	tigl::shader->setFogColor(glm::vec3(0.3f, 0.4f, 0.6f));
-	tigl::shader->setFogExp2(0.04f);
-	tigl::shader->setShinyness(0);
+	tigl::shader->setShinyness(0);*/
+
+	glm::vec4 f(51.4649882, -0.089, 51.5457077, 0.079);
+	tileCollector col = tileCollector();
+	std::shared_ptr<tileBuilder::tileData> data  = col.collectTileDataInternet(f);
 
 
-	object = new gameObject();
+	std::list<std::shared_ptr<gameObject>> objects;
+	for (tileBuilder::tileZone zone : data->data) {
+		std::shared_ptr<gameObject> object = std::make_shared<gameObject>();
+		object->addComponent(std::make_shared<floorComponent>(zone));
+		object->position = glm::vec3(0.0f);
+		object->scale = glm::vec3(1.0f);
+		objects.push_back(object);
+	}
+
+	tile = std::make_shared<gameTile>(objects);
+	tile->gamePosition = glm::vec3(0.0f);
+
+
+	/*object = new gameObject();
 	object->scale = glm::vec3(0.001f);
 	object->position = glm::vec3(0.0f);
-	object->addComponent(std::make_shared<objectComponent>("resources/plane/11803_Airplane_v1_l1.obj"));
+	object->addComponent(std::make_shared<objectComponent>("resources/plane/11803_Airplane_v1_l1.obj"));*/
 }
 
 void update()
@@ -73,7 +86,7 @@ void draw()
 
 	glEnable(GL_DEPTH_TEST);
 
-	tigl::begin(GL_TRIANGLES);
+	/*tigl::begin(GL_TRIANGLES);
 	tigl::addVertex(Vertex::PC(glm::vec3(-2, -1, -4), glm::vec4(1, 0, 0, 1)));
 	tigl::addVertex(Vertex::PC(glm::vec3(2, -1, -4), glm::vec4(0, 1, 0, 1)));
 	tigl::addVertex(Vertex::PC(glm::vec3(0, 1, -4), glm::vec4(0, 0, 1, 1)));
@@ -87,11 +100,9 @@ void draw()
 	tigl::addVertex(Vertex::PC(glm::vec3(10, -1, -10), glm::vec4(1, 1, 1, 1)));
 	tigl::addVertex(Vertex::PC(glm::vec3(10, -1, 10), glm::vec4(1, 1, 1, 1)));
 
-	tigl::end();
+	tigl::end();*/
 
-	object->draw();
-
-
+	tile->draw();
 }
 
 

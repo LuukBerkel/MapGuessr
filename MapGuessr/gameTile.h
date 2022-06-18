@@ -10,6 +10,7 @@ private:
 public:
 	// Position in the game
 	glm::vec3 gamePosition;
+	glm::vec3 worldPosition;
 
 	// For setting objects
 	gameTile(std::list<std::shared_ptr<gameObject>> parameterObjects);

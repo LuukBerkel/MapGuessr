@@ -22,6 +22,8 @@ void gameTile::draw()
 	glm::mat4 modelMatrix = relativePos;
 	modelMatrix = glm::translate(modelMatrix, gamePosition);
 
+
+
 	// Drawing objects.
 	for (auto& object : gameObjects) {
 		object->draw(modelMatrix);

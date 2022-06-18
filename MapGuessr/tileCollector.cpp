@@ -11,7 +11,7 @@
 #define ERROR_MESSAGE_LENGTH 593
 
 static tileBuilder::zoneType checkZoneType(rapidxml::xml_node<>* tag_node);
-static std::shared_ptr<tileBuilder::tileData> parseData(std::string& incoming);
+static std::shared_ptr<tileBuilder::tileData> parseData(std::string& incoming, glm::vec4 location);
 
 size_t writeCallback(char* contents, size_t size, size_t nmemb, void* userp)
 {
@@ -60,10 +60,12 @@ std::shared_ptr<tileBuilder::tileData> tileCollector::collectTileDataInternet(gl
 		return nullptr;
 	}
 
-	return parseData(rawData);
+	std::cout << "received shit" << std::endl;
+
+	return parseData(rawData, location);
 }
 
-static std::shared_ptr<tileBuilder::tileData> parseData(std::string& incoming) {
+static std::shared_ptr<tileBuilder::tileData> parseData(std::string& incoming, glm::vec4 location) {
 	// Creating object for saving data
 	std::shared_ptr<tileBuilder::tileData> data = std::make_shared<tileBuilder::tileData>();
 
@@ -83,9 +85,11 @@ static std::shared_ptr<tileBuilder::tileData> parseData(std::string& incoming) {
 		bool terrainTypeLoaded = false;
 
 		// Parsing terraintype
-		for (rapidxml::xml_node<>* tag_node = perimter_node->first_node("nd"); tag_node; tag_node = tag_node->next_sibling()) {
-			if (checkZoneType(tag_node) != tileBuilder::zoneType::EMPTY)
+		for (rapidxml::xml_node<>* tag_node = perimter_node->first_node("tag"); tag_node; tag_node = tag_node->next_sibling()) {
+			if (checkZoneType(tag_node) != tileBuilder::zoneType::EMPTY) {
 				zone.type = checkZoneType(tag_node);
+				terrainTypeLoaded = true;
+			}
 		}
 
 		// If no terrain type then ignore else execute loading perimeter
@@ -95,12 +99,17 @@ static std::shared_ptr<tileBuilder::tileData> parseData(std::string& incoming) {
 			// Parsing perimter
 			for (rapidxml::xml_node<>* coord_node = perimter_node->first_node("nd"); coord_node; coord_node = coord_node->next_sibling())
 			{
-				float lon = std::stof(coord_node->first_attribute("lon")->value());
-				float lat = std::stof(coord_node->first_attribute("lat")->value());
-				zone.perimeter.push_back(glm::vec2(lat, lon));
+				if (coord_node->first_attribute("lat") != nullptr || coord_node->first_attribute("lon") != nullptr) {
+					float lat = (location.x - std::stof(coord_node->first_attribute("lat")->value()));
+					float lon =	(location.y - std::stof(coord_node->first_attribute("lon")->value()));
+					lat *= 100;
+					lon *= 100;
+					zone.perimeter.push_back(glm::vec2(lat, lon));
+				}
 			}
-		}
 
+			data->data.push_back(zone);
+		}
 	}
 
 	return data;
