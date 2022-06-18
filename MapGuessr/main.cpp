@@ -31,37 +31,16 @@ void init()
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	/*tigl::shader->enableLighting(true);
+	tigl::shader->enableLighting(true);
 	tigl::shader->setLightCount(1);
 	tigl::shader->setLightDirectional(0, true);
 	tigl::shader->setLightPosition(0, (glm::vec3(0, 7, 12)));
 	tigl::shader->setLightAmbient(0, glm::vec3(0.5f, 0.5f, 0.5f));
 	tigl::shader->setLightDiffuse(0, glm::vec3(0.5f, 0.5f, 0.5f));
 	tigl::shader->setLightSpecular(0, glm::vec3(1, 1, 1));
-	tigl::shader->setShinyness(0);*/
-
-	glm::vec4 f(51.4649882, -0.089, 51.5457077, 0.079);
-	tileCollector col = tileCollector();
-	std::shared_ptr<tileBuilder::tileData> data  = col.collectTileDataInternet(f);
+	tigl::shader->setShinyness(0);
 
 
-	std::list<std::shared_ptr<gameObject>> objects;
-	for (tileBuilder::tileZone zone : data->data) {
-		std::shared_ptr<gameObject> object = std::make_shared<gameObject>();
-		object->addComponent(std::make_shared<floorComponent>(zone));
-		object->position = glm::vec3(0.0f);
-		object->scale = glm::vec3(1.0f);
-		objects.push_back(object);
-	}
-
-	tile = std::make_shared<gameTile>(objects);
-	tile->gamePosition = glm::vec3(0.0f);
-
-
-	/*object = new gameObject();
-	object->scale = glm::vec3(0.001f);
-	object->position = glm::vec3(0.0f);
-	object->addComponent(std::make_shared<objectComponent>("resources/plane/11803_Airplane_v1_l1.obj"));*/
 }
 
 void update()

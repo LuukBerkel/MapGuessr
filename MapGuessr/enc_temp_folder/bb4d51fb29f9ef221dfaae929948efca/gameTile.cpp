@@ -1,8 +1,9 @@
 #include "gameTile.h"
 #include <glm/gtc/matrix_transform.hpp>
 
-gameTile::gameTile()
+gameTile::gameTile(std::list<std::shared_ptr<gameObject>> parameterObjects)
 {
+	gameObjects = parameterObjects;
 }
 
 gameTile::~gameTile()
@@ -14,11 +15,6 @@ void gameTile::addObject(std::shared_ptr<gameObject> object)
 	if (object != nullptr) gameObjects.push_back(object);
 }
 
-void gameTile::addObjects(std::list<std::shared_ptr<gameObject>> objects)
-{
-	gameObjects = objects;
-}
-
 void gameTile::draw()
 {
 	// Calculating a new model matrix.
@@ -26,8 +22,12 @@ void gameTile::draw()
 	glm::mat4 modelMatrix = relativePos;
 	modelMatrix = glm::translate(modelMatrix, gamePosition);
 
+
+
 	// Drawing objects.
 	for (auto& object : gameObjects) {
+
+
 		object->draw(modelMatrix);
 	}
 }

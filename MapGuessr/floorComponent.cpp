@@ -31,19 +31,19 @@ static glm::vec4 collectColor(tileBuilder::zoneType type) {
 
 static float collectOfsett(tileBuilder::zoneType type) {
 	if (type == tileBuilder::zoneType::COMMERCIAL || type == tileBuilder::zoneType::HOMES) {
-		return 0.00001f;
+		return 0.0001f;
 	}
 	if (type == tileBuilder::zoneType::GRASS) {
-		return 0.00002f;
+		return 0.0002f;
 	}
 	if (type == tileBuilder::zoneType::FOODPROD) {
-		return 0.00002f;
+		return 0.0002f;
 	}
 	if (type == tileBuilder::zoneType::FOREST) {
-		return 0.00003f ;
+		return 0.0003f ;
 	}
 	if (type == tileBuilder::zoneType::WATER) {
-		return -0.0004f;
+		return -0.0001f;
 	}
 	if (type == tileBuilder::zoneType::ROAD) {
 		return 0.0005f;
@@ -53,8 +53,6 @@ static float collectOfsett(tileBuilder::zoneType type) {
 
 floorComponent::floorComponent(tileBuilder::tileZone zones)
 {
-	std::vector<tigl::Vertex> vertices;
-
 	// Setting color for vertices
 	glm::vec4 color= collectColor(zones.type);
 	float ofsett = collectOfsett(zones.type);
@@ -74,8 +72,6 @@ floorComponent::floorComponent(tileBuilder::tileZone zones)
 	{
 		vertices.push_back(tigl::Vertex::PCN(glm::vec3(vec.GetX(), FLOOR_HEIGHT + ofsett, vec.GetY()), color, glm::vec3(0,1,0)));
 	}
-
-	vbo = tigl::createVbo(vertices);
 }
 
 floorComponent::~floorComponent()
@@ -84,5 +80,5 @@ floorComponent::~floorComponent()
 
 void floorComponent::draw()
 {
-	tigl::drawVertices(GL_TRIANGLES, vbo);
+	tigl::drawVertices(GL_TRIANGLES, vertices);
 }

@@ -40,8 +40,8 @@ public:
 
 private:
 	tileCollector collector;
-	void collectTileAsync(glm::vec4 location, std::shared_ptr<gameTile> tile);
+	void collectTileAsync(glm::vec4 location);
 	bool checkCache(glm::vec4 location);
-	void collectCacheAsync(glm::vec4 location, std::shared_ptr<gameTile> tile);
+	void collectCacheAsync(glm::vec4 location);
 	void addCache(std::shared_ptr<gameTile> tile);
 };
