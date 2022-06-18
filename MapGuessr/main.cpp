@@ -1,16 +1,14 @@
 #include <iostream>
-#include <curl/curl.h>
 #include <GL/glew.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include "tigl.h"
 #include "objectComponent.h"
 #include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
-#include <rapidxml/rapidxml.hpp>
 #include "fpsCamera.h"
 
 #include "objectComponent.h"
-
+#include "tileCollector.h"
 using tigl::Vertex;
 
 GLFWwindow* window;
@@ -19,6 +17,11 @@ gameObject* object;
 
 void init()
 {
+	glm::vec4 f(51.4649882, -0.089, 51.5457077, 0.079);
+	tileCollector col = tileCollector();
+	col.collectTileDataInternet(f);
+
+
 	tigl::init();
 	glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
 		{

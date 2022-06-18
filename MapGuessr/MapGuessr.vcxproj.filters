@@ -32,6 +32,15 @@
     <ClCompile Include="gameTile.cpp">
       <Filter>graphics\logic</Filter>
     </ClCompile>
+    <ClCompile Include="tileBuilder.cpp">
+      <Filter>geography</Filter>
+    </ClCompile>
+    <ClCompile Include="gameScene.cpp">
+      <Filter>graphics\logic</Filter>
+    </ClCompile>
+    <ClCompile Include="tileCollector.cpp">
+      <Filter>geography</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="libraries">
@@ -89,6 +98,15 @@
     </ClInclude>
     <ClInclude Include="gameTile.h">
       <Filter>graphics\logic</Filter>
+    </ClInclude>
+    <ClInclude Include="gameScene.h">
+      <Filter>graphics\logic</Filter>
+    </ClInclude>
+    <ClInclude Include="tileBuilder.h">
+      <Filter>geography</Filter>
+    </ClInclude>
+    <ClInclude Include="tileCollector.h">
+      <Filter>geography</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -166,25 +166,31 @@
     <ClCompile Include="fpsCamera.cpp" />
     <ClCompile Include="gameComponent.cpp" />
     <ClCompile Include="gameObject.cpp" />
+    <ClCompile Include="gameScene.cpp" />
     <ClCompile Include="gameTile.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="objectComponent.cpp" />
     <ClCompile Include="playerComponent.cpp" />
     <ClCompile Include="textureComponent.cpp" />
     <ClCompile Include="tigl.cpp" />
+    <ClCompile Include="tileBuilder.cpp" />
+    <ClCompile Include="tileCollector.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="drawComponent.h" />
     <ClInclude Include="fpsCamera.h" />
+    <ClInclude Include="tileBuilder.h" />
     <ClInclude Include="gameComponent.h" />
     <ClInclude Include="floorComponent.h" />
     <ClInclude Include="gameObject.h" />
+    <ClInclude Include="gameScene.h" />
     <ClInclude Include="gameTile.h" />
     <ClInclude Include="objectComponent.h" />
     <ClInclude Include="playerComponent.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="textureComponent.h" />
     <ClInclude Include="tigl.h" />
+    <ClInclude Include="tileCollector.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
