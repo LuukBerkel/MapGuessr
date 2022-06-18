@@ -29,6 +29,9 @@
     <ClCompile Include="fpsCamera.cpp">
       <Filter>graphics\logic</Filter>
     </ClCompile>
+    <ClCompile Include="gameTile.cpp">
+      <Filter>graphics\logic</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="libraries">
@@ -83,12 +86,6 @@
     </ClInclude>
     <ClInclude Include="fpsCamera.h">
       <Filter>graphics\logic</Filter>
-    </ClInclude>
-    <ClInclude Include="tileParser.h">
-      <Filter>geography</Filter>
-    </ClInclude>
-    <ClInclude Include="tileCacher.h">
-      <Filter>geography</Filter>
     </ClInclude>
     <ClInclude Include="gameTile.h">
       <Filter>graphics\logic</Filter>

@@ -27,6 +27,21 @@ void init()
 		});
 	camera = new fpsCamera(window);
 
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	tigl::shader->enableLighting(true);
+	tigl::shader->setLightCount(1);
+	tigl::shader->setLightDirectional(0, true);
+	tigl::shader->setLightPosition(0, (glm::vec3(0, 7, 12)));
+	tigl::shader->setLightAmbient(0, glm::vec3(0.5f, 0.5f, 0.5f));
+	tigl::shader->setLightDiffuse(0, glm::vec3(0.5f, 0.5f, 0.5f));
+	tigl::shader->setLightSpecular(0, glm::vec3(1, 1, 1));
+	tigl::shader->setFogColor(glm::vec3(0.3f, 0.4f, 0.6f));
+	tigl::shader->setFogExp2(0.04f);
+	tigl::shader->setShinyness(0);
+
+
 	object = new gameObject();
 	object->scale = glm::vec3(0.001f);
 	object->position = glm::vec3(0.0f);
