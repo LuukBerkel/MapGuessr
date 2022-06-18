@@ -41,6 +41,9 @@
     <ClCompile Include="tileCollector.cpp">
       <Filter>geography</Filter>
     </ClCompile>
+    <ClCompile Include="triangulate.cpp">
+      <Filter>libraries</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="libraries">
@@ -107,6 +110,9 @@
     </ClInclude>
     <ClInclude Include="tileCollector.h">
       <Filter>geography</Filter>
+    </ClInclude>
+    <ClInclude Include="triangulate.h">
+      <Filter>libraries</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

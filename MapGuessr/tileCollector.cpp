@@ -67,7 +67,8 @@ std::shared_ptr<tileBuilder::tileData> tileCollector::collectTileDataInternet(gl
 	
 	// Parsing water
 	res = collectFromAPI(water.str());
-	//parseData(res, location, data)
+	//parseData(res, location, data);
+
 	//// Building request string...
 	//std::stringstream road;
 	//road << "data=%5Bbbox%3A" << std::fixed << std::setprecision(15) << location.x << "%2C" << location.y << "%2C" << location.z << "%2C" << location.w << "%5D%3B%0Anwr%20%5B%22highway%22%5D%3B%0Aout%20geom%3B";
@@ -112,9 +113,11 @@ static std::shared_ptr<tileBuilder::tileData> parseData(std::string& incoming, g
 				if (coord_node->first_attribute("lat") != nullptr || coord_node->first_attribute("lon") != nullptr) {
 					float lat = (location.x - std::stof(coord_node->first_attribute("lat")->value()));
 					float lon =	(location.y - std::stof(coord_node->first_attribute("lon")->value()));
-					lat *= 100;
-					lon *= 100;
-					zone.perimeter.push_back(glm::vec2(lat, lon));
+					if (lat < 0 && lat > (location.x - location.z) && lon < 0 && lon > (location.y - location.w)) {
+						lat *= 100;
+						lon *= 100;
+						zone.perimeter.push_back(glm::vec2(lat, lon));
+					}
 				}
 			}
 
@@ -125,17 +128,15 @@ static std::shared_ptr<tileBuilder::tileData> parseData(std::string& incoming, g
 	// Looping through data on members and relations.
 	for (rapidxml::xml_node<>* relation_node = root_node->first_node("relation"); relation_node; relation_node = relation_node->next_sibling())
 	{
-		tileBuilder::tileZone zone = tileBuilder::tileZone::tileZone();
-		zone.type = tileBuilder::zoneType::EMPTY;
+		tileBuilder::zoneType z = tileBuilder::zoneType::EMPTY;
 
 		bool terrainTypeLoaded = false;
 
 		// Parsing terraintype
 		for (rapidxml::xml_node<>* tag_node = relation_node->first_node("tag"); tag_node; tag_node = tag_node->next_sibling()) {
 			if (checkZoneType(tag_node) != tileBuilder::zoneType::EMPTY) {
-				zone.type = checkZoneType(tag_node);
+				z = checkZoneType(tag_node);
 				terrainTypeLoaded = true;
-
 			}
 		}
 
@@ -143,19 +144,22 @@ static std::shared_ptr<tileBuilder::tileData> parseData(std::string& incoming, g
 		if (terrainTypeLoaded) {
 			// Parsing perimter
 			for (rapidxml::xml_node<>* member_node = relation_node->first_node("member"); member_node; member_node = member_node->next_sibling()) {
+				tileBuilder::tileZone zone = tileBuilder::tileZone::tileZone();
+				zone.type = z;
 				for (rapidxml::xml_node<>* coord_node = member_node->first_node("nd"); coord_node; coord_node = coord_node->next_sibling())
 				{
 					if (coord_node->first_attribute("lat") != nullptr || coord_node->first_attribute("lon") != nullptr) {
 						float lat = (location.x - std::stof(coord_node->first_attribute("lat")->value()));
 						float lon = (location.y - std::stof(coord_node->first_attribute("lon")->value()));
-						lat *= 100;
-						lon *= 100;
-						zone.perimeter.push_back(glm::vec2(lat, lon));
+						if (lat < 0 && lat >(location.x - location.z) && lon < 0 && lon >(location.y - location.w)) {
+							lat *= 100;
+							lon *= 100;
+							zone.perimeter.push_back(glm::vec2(lat, lon));
+						}
 					}
 				}
+				data->data.push_back(zone);
 			}
-
-			data->data.push_back(zone);
 		}
 	}
 
@@ -172,13 +176,13 @@ static tileBuilder::zoneType checkZoneType(rapidxml::xml_node<>* tag_node) {
 	if (value._Equal("construction") || value._Equal("education") || value._Equal("residential")) {
 		return tileBuilder::zoneType::HOMES;
 	}
-	if (value._Equal("farmland") || value._Equal("meadow")) {
+	if (value._Equal("farmland") || value._Equal("grass") || value._Equal("recreation_ground") || value._Equal("meadow")) {
 		return tileBuilder::zoneType::GRASS;
 	}
 	if (value._Equal("allotments") || value._Equal("orchard") || value._Equal("vineyard")) {
 		return tileBuilder::zoneType::FOODPROD;
 	}
-	if (value._Equal("forest")) {
+	if (value._Equal("forest") || value._Equal("wood")) {
 		return tileBuilder::zoneType::FOREST;
 	}
 	if (value._Equal("water")) {

@@ -7,7 +7,7 @@
 
 class floorComponent : public drawComponent {
 private:
-	std::vector<tigl::Vertex> vertices;
+	tigl::VBO* vbo;
 public:
 	floorComponent(tileBuilder::tileZone zone);
 	~floorComponent();

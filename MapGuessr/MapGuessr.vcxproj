@@ -175,6 +175,7 @@
     <ClCompile Include="tigl.cpp" />
     <ClCompile Include="tileBuilder.cpp" />
     <ClCompile Include="tileCollector.cpp" />
+    <ClCompile Include="triangulate.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="drawComponent.h" />
@@ -191,6 +192,7 @@
     <ClInclude Include="textureComponent.h" />
     <ClInclude Include="tigl.h" />
     <ClInclude Include="tileCollector.h" />
+    <ClInclude Include="triangulate.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
