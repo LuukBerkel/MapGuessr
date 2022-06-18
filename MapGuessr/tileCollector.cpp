@@ -10,11 +10,15 @@
 
 #define ERROR_MESSAGE_LENGTH 593
 
+static tileBuilder::zoneType checkZoneType(rapidxml::xml_node<>* tag_node);
+static std::shared_ptr<tileBuilder::tileData> parseData(std::string& incoming);
+
 size_t writeCallback(char* contents, size_t size, size_t nmemb, void* userp)
 {
 	((std::string*)userp)->append((char*)contents, size * nmemb);
 	return size * nmemb;
 }
+
 
 std::shared_ptr<tileBuilder::tileData> tileCollector::collectTileDataInternet(glm::vec4& location)
 {
@@ -56,12 +60,16 @@ std::shared_ptr<tileBuilder::tileData> tileCollector::collectTileDataInternet(gl
 		return nullptr;
 	}
 
+	return parseData(rawData);
+}
+
+static std::shared_ptr<tileBuilder::tileData> parseData(std::string& incoming) {
 	// Creating object for saving data
 	std::shared_ptr<tileBuilder::tileData> data = std::make_shared<tileBuilder::tileData>();
 
 	// Parsing response data
 	rapidxml::xml_document<> doc;
-	doc.parse<0>(&rawData[0]);
+	doc.parse<0>(&incoming[0]);
 
 	// Find our root node
 	rapidxml::xml_node<>* root_node = doc.first_node("osm");
@@ -69,23 +77,55 @@ std::shared_ptr<tileBuilder::tileData> tileCollector::collectTileDataInternet(gl
 	// Looping through all perimters.
 	for (rapidxml::xml_node<>* perimter_node = root_node->first_node("way"); perimter_node; perimter_node = perimter_node->next_sibling())
 	{
-		// Guard if to check if it has land usage.
-		if (strcmp(perimter_node->first_node("tag")->first_attribute("k")->value(), "landuse") == 0 ){
-			
-			tileBuilder::tileZone zone = tileBuilder::tileZone::tileZone();
+		tileBuilder::tileZone zone = tileBuilder::tileZone::tileZone();
+		zone.type = tileBuilder::zoneType::EMPTY;
 
-			// Checking what type of terrain it is...
-			
+		bool terrainTypeLoaded = false;
+
+		// Parsing terraintype
+		for (rapidxml::xml_node<>* tag_node = perimter_node->first_node("nd"); tag_node; tag_node = tag_node->next_sibling()) {
+			if (checkZoneType(tag_node) != tileBuilder::zoneType::EMPTY)
+				zone.type = checkZoneType(tag_node);
+		}
+
+		// If no terrain type then ignore else execute loading perimeter
+		if (terrainTypeLoaded) {
+			perimter_node->first_node("tag")->first_attribute("v")->value();
 
 			// Parsing perimter
-			for (rapidxml::xml_node<>* coord_node = coord_node->first_node("nd"); coord_node; coord_node = coord_node->next_sibling())
+			for (rapidxml::xml_node<>* coord_node = perimter_node->first_node("nd"); coord_node; coord_node = coord_node->next_sibling())
 			{
-				
+				float lon = std::stof(coord_node->first_attribute("lon")->value());
+				float lat = std::stof(coord_node->first_attribute("lat")->value());
+				zone.perimeter.push_back(glm::vec2(lat, lon));
 			}
 		}
+
 	}
 
 	return data;
+}
+
+static tileBuilder::zoneType checkZoneType(rapidxml::xml_node<>* tag_node) {
+	std::string value = std::string(tag_node->first_attribute("v")->value());
+	// First degree
+	if (value._Equal("commercial") || value._Equal("retail")) {
+		return tileBuilder::zoneType::COMMERCIAL;
+	}
+	if (value._Equal("construction") || value._Equal("education") || value._Equal("residential")) {
+		return tileBuilder::zoneType::HOMES;
+	}
+	if (value._Equal("farmland") || value._Equal("meadow")) {
+		return tileBuilder::zoneType::GRASS;
+	}
+	if (value._Equal("allotments") || value._Equal("orchard") || value._Equal("vineyard")) {
+		return tileBuilder::zoneType::FOODPROD;
+	}
+	if (value._Equal("forest")) {
+		return tileBuilder::zoneType::FOREST;
+	}
+
+	return tileBuilder::zoneType::EMPTY;
 }
 
 std::shared_ptr<gameTile> tileCollector::collectGameTileChache(glm::vec4& location)

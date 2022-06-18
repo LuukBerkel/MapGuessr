@@ -13,8 +13,9 @@ public:
 		INDUSTRIAL,
 		FOREST,
 		WATER,
-		SAND,
-		SNOW
+		COMMERCIAL,
+		FOODPROD,
+		EMPTY
 	};
 
 	// Holds a area with terrain type.
