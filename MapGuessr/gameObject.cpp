@@ -37,7 +37,15 @@ void gameObject::draw(const glm::mat4& parentMatrix)
 	modelMatrix = glm::rotate(modelMatrix, rotation.z, glm::vec3(0, 0, 1));
 	modelMatrix = glm::scale(modelMatrix, scale);
 
-	/*tigl::shader->setModelMatrix(modelMatrix);*/
+	// Can be used a secondary usage of moving when in position.
+	if (enableRelatives) {
+		modelMatrix = glm::translate(modelMatrix, relativePos);
+		modelMatrix = glm::rotate(modelMatrix, relativeRotation.x, glm::vec3(1, 0, 0));
+		modelMatrix = glm::rotate(modelMatrix, relativeRotation.y, glm::vec3(0, 1, 0));
+		modelMatrix = glm::rotate(modelMatrix, relativeRotation.z, glm::vec3(0, 0, 1));
+	}
+
+	tigl::shader->setModelMatrix(modelMatrix);
 
 	for (auto& c : components) {
 		std::shared_ptr<drawComponent> dc = dynamic_pointer_cast<drawComponent>(c);

@@ -21,6 +21,9 @@ public:
 	glm::vec3 position;
 	glm::vec3 rotation = glm::vec3(0, 0, 0);
 	glm::vec3 scale = glm::vec3(1, 1, 1);
+	bool enableRelatives = false;
+	glm::vec3 relativePos;
+	glm::vec3 relativeRotation;
 
 
 	void addComponent(std::shared_ptr<gameComponent> component);
