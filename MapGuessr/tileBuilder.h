@@ -26,14 +26,14 @@ public:
 	class tileZone {
 	public:
 		tileBuilder::zoneType type;
-		std::vector<glm::vec2> perimeter;
+		std::vector<std::vector<glm::vec2>> perimeter;
 	};
 
 	// Holds the tile data.
 	class tileData {
 	public:
 		glm::vec4 location;
-		std::vector<tileZone> data;
+		std::vector<std::shared_ptr<tileZone>> data;
 	};
 
 	tileBuilder();

@@ -91,22 +91,34 @@ static std::shared_ptr<tileBuilder::tileData> parseData(std::string& incoming, g
 	// Looping through the data on the way manner
 	for (rapidxml::xml_node<>* perimter_node = root_node->first_node("way"); perimter_node; perimter_node = perimter_node->next_sibling())
 	{
-		tileBuilder::tileZone zone = tileBuilder::tileZone::tileZone();
-		zone.type = tileBuilder::zoneType::EMPTY;
+		std::shared_ptr<tileBuilder::tileZone> zone;
 
 		bool terrainTypeLoaded = false;
 
 		// Parsing terraintype
 		for (rapidxml::xml_node<>* tag_node = perimter_node->first_node("tag"); tag_node; tag_node = tag_node->next_sibling()) {
 			if (checkZoneType(tag_node) != tileBuilder::zoneType::EMPTY) {
-				zone.type = checkZoneType(tag_node);
-				terrainTypeLoaded = true;
+				bool created = true;
+				for (std::shared_ptr<tileBuilder::tileZone> type : data->data) {
+					if (type->type == checkZoneType(tag_node)) {
+						created = false;
+						zone = type;
+					}
+				}
 
+				// If it is not in the list then
+				if (created) {
+					zone = std::make_shared<tileBuilder::tileData>();
+					zone->type = checkZoneType(tag_node);
+				}
+				
+				terrainTypeLoaded = true;
 			}
 		}
 
 		// If no terrain type then ignore else execute loading perimeter
 		if (terrainTypeLoaded) {
+			std::vector<glm::vec2> coordinates;
 			// Parsing perimter
 			for (rapidxml::xml_node<>* coord_node = perimter_node->first_node("nd"); coord_node; coord_node = coord_node->next_sibling())
 			{
@@ -116,11 +128,11 @@ static std::shared_ptr<tileBuilder::tileData> parseData(std::string& incoming, g
 					if (lat < 0 && lat > (location.x - location.z) && lon < 0 && lon > (location.y - location.w)) {
 						lat *= 100;
 						lon *= 100;
-						zone.perimeter.push_back(glm::vec2(lat, lon));
+						coordinates.push_back(glm::vec2(lat, lon));
 					}
 				}
 			}
-
+			zone->perimeter.push_back(coordinates);
 			data->data.push_back(zone);
 		}
 	}
@@ -128,14 +140,27 @@ static std::shared_ptr<tileBuilder::tileData> parseData(std::string& incoming, g
 	// Looping through data on members and relations.
 	for (rapidxml::xml_node<>* relation_node = root_node->first_node("relation"); relation_node; relation_node = relation_node->next_sibling())
 	{
-		tileBuilder::zoneType z = tileBuilder::zoneType::EMPTY;
+		std::shared_ptr<tileBuilder::tileZone> zone;
 
 		bool terrainTypeLoaded = false;
 
 		// Parsing terraintype
 		for (rapidxml::xml_node<>* tag_node = relation_node->first_node("tag"); tag_node; tag_node = tag_node->next_sibling()) {
 			if (checkZoneType(tag_node) != tileBuilder::zoneType::EMPTY) {
-				z = checkZoneType(tag_node);
+				bool created = true;
+				for (std::shared_ptr<tileBuilder::tileZone> type : data->data) {
+					if (type->type == checkZoneType(tag_node)) {
+						created = false;
+						zone = type;
+					}
+				}
+
+				// If it is not in the list then
+				if (created) {
+					zone = std::make_shared<tileBuilder::tileData>();
+					zone->type = checkZoneType(tag_node);
+				}
+
 				terrainTypeLoaded = true;
 			}
 		}
@@ -144,8 +169,7 @@ static std::shared_ptr<tileBuilder::tileData> parseData(std::string& incoming, g
 		if (terrainTypeLoaded) {
 			// Parsing perimter
 			for (rapidxml::xml_node<>* member_node = relation_node->first_node("member"); member_node; member_node = member_node->next_sibling()) {
-				tileBuilder::tileZone zone = tileBuilder::tileZone::tileZone();
-				zone.type = z;
+				std::vector<glm::vec2> coordinates;
 				for (rapidxml::xml_node<>* coord_node = member_node->first_node("nd"); coord_node; coord_node = coord_node->next_sibling())
 				{
 					if (coord_node->first_attribute("lat") != nullptr || coord_node->first_attribute("lon") != nullptr) {
@@ -154,10 +178,11 @@ static std::shared_ptr<tileBuilder::tileData> parseData(std::string& incoming, g
 						if (lat < 0 && lat >(location.x - location.z) && lon < 0 && lon >(location.y - location.w)) {
 							lat *= 100;
 							lon *= 100;
-							zone.perimeter.push_back(glm::vec2(lat, lon));
+							coordinates.push_back(glm::vec2(lat, lon));
 						}
 					}
 				}
+				zone->perimeter.push_back(coordinates);
 				data->data.push_back(zone);
 			}
 		}
