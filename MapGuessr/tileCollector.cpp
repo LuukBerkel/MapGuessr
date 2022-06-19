@@ -230,6 +230,9 @@ static tileBuilder::zoneType checkZoneType(rapidxml::xml_node<>* tag_node) {
 
 std::shared_ptr<gameTile> tileCollector::collectGameTileChache(glm::vec4& location)
 {
+
+
+
 	return std::shared_ptr<gameTile>();
 }
 

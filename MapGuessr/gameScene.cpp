@@ -76,8 +76,8 @@ void gameScene::changedWorldIndex(glm::vec2 worldIndex) {
 	{
 		for (size_t j = 0; j < viewDistance; j++)
 		{
-			float ofsettX = -0.01f +  (i * 0.01);
-			float ofsettY = -0.01f + (j * 0.01);
+			float ofsettX = -0.01f +  (i * 0.01f);
+			float ofsettY = -0.01f + (j * 0.01f);
 			glm::vec4 pos(
 				worldStartingPoint.x + (worldIndex.x * 0.01) + ofsettX - 0.005, 
 				worldStartingPoint.y + (worldIndex.y * 0.01) + ofsettY - 0.005, 
@@ -98,8 +98,8 @@ void gameScene::update(float elapsedTime)
 	float xDelta = location.x - worldStartingPoint.x;
 	float yDelta = location.y - worldStartingPoint.y;
 
-	float xIndex = xDelta / 0.01;
-	float yIndex = yDelta / 0.01;
+	float xIndex = xDelta / 0.01f;
+	float yIndex = yDelta / 0.01f;
 
 	// Updating world index;
 	if (worldIndexing != glm::vec2((int)xIndex, (int)yIndex)) {
