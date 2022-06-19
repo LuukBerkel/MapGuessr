@@ -40,10 +40,19 @@ public:
 		std::vector<std::shared_ptr<tileZone>> data;
 	};
 
+	/**
+	 * @brief Constructor of the tileBuilder class.
+	*/
 	tileBuilder();
+
+	/**
+	 * @brief Collects the tiles and first tries from memory then from disk and else on the internet.
+	 * @param location This used as a key for the data.
+	 * @return A shared pointer is returend with the data of a tile in a tileData object. 
+	*/
 	std::shared_ptr<gameTile> collectTile(glm::vec4 location);
 private:
-	tileCollector* collector;
+	std::shared_ptr <tileCollector> collector;
 
 	
 

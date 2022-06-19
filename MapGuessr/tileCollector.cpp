@@ -236,6 +236,11 @@ std::shared_ptr<gameTile> tileCollector::collectGameTileChache(glm::vec4& locati
 	return std::shared_ptr<gameTile>();
 }
 
+bool tileCollector::checkGameTileChache(glm::vec4& location)
+{
+	return false;
+}
+
 void tileCollector::writeGameTileTooCache(std::shared_ptr<gameTile> tile)
 {
 }

@@ -1,20 +1,20 @@
 #include "tileBuilder.h"
+
 #include "floorComponent.h"
 #include <thread>
 #include "tileCollector.h"
+
 
 tileBuilder::tileBuilder()
 {
 	collector = std::make_shared<tileCollector>();
 }
 
-// Cache list in memory
 static std::map<std::vector<float>, std::shared_ptr<gameTile>> cachedTiles;
 static std::mutex cachedObjectsTiles;
 
 std::shared_ptr<gameTile> tileBuilder::collectTile(glm::vec4 location)
 {
-	// First option (-: we are going to check the memory cache
 	cachedObjectsTiles.lock();
 	for (auto [key, val] : cachedTiles)
 	{
@@ -24,19 +24,17 @@ std::shared_ptr<gameTile> tileBuilder::collectTile(glm::vec4 location)
 		}
 	}
 
-	// Second option |-: we are going to check the hdd cache
 	std::shared_ptr<gameTile> tile = std::make_shared<gameTile>();
 	std::vector<float> locations = {location.x, location.y, location.z, location.w};
 	
 	cachedTiles.emplace(locations, tile );
 	cachedObjectsTiles.unlock();
 
+	// Check cache if it on the pc
 	if (checkCache(location)) {
 		std::thread thread(&tileBuilder::collectCacheAsync, this, location, tile);
 		thread.detach();
 	}
-
-	// Thirth option )-; we are going to collect it from the internet
 	else {
 		std::thread thread(&tileBuilder::collectTileAsync, this, location, tile);
 		thread.detach();
@@ -44,6 +42,8 @@ std::shared_ptr<gameTile> tileBuilder::collectTile(glm::vec4 location)
 
 	return tile;
 }
+
+
 
 void tileBuilder::collectTileAsync(glm::vec4 location, std::shared_ptr<gameTile> tile)
 {
@@ -71,25 +71,18 @@ void tileBuilder::collectTileAsync(glm::vec4 location, std::shared_ptr<gameTile>
 	tile->worldPosition = location;
 
 	// Adding item to cache
-	addCache(tile);
-
-	// Some debug print
-	std::cout << "Done with loading an tile. Ready for usage now!" << std::endl;
+	// TODO create cache funtions...
 }
-
-/*Some wrappers to make my life a tat easier. Not really usefull I know. */
 
 bool tileBuilder::checkCache(glm::vec4 location)
 {
-	return collector->checkGameTileChache(location);
+	return false;
 }
 
 void tileBuilder::collectCacheAsync(glm::vec4 location, std::shared_ptr<gameTile> tile)
 {
-	tile = collector->collectGameTileChache(location);
 }
 
 void tileBuilder::addCache(std::shared_ptr<gameTile> tile)
 {
-	collector->writeGameTileTooCache(tile);
 }
