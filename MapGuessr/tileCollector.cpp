@@ -6,7 +6,8 @@
 #include <iomanip>
 #include <cmath>
 #include <limits>
-#include <string.h>    
+#include <string.h> 
+#include <mutex>
 
 #define ERROR_MESSAGE_LENGTH 593
 
@@ -19,7 +20,11 @@ size_t writeCallback(char* contents, size_t size, size_t nmemb, void* userp)
 	return size * nmemb;
 }
 
+std::mutex curlMutex;
+
 static std::string collectFromAPI(std::string input) {
+
+	curlMutex.lock();
 	// Setting up curl
 	CURL* curl;
 	std::string rawData;
@@ -45,6 +50,8 @@ static std::string collectFromAPI(std::string input) {
 	}
 	curl_easy_cleanup(curl);
 
+	curlMutex.unlock();
+
 	return rawData;
 }
 
@@ -69,17 +76,21 @@ std::shared_ptr<tileBuilder::tileData> tileCollector::collectTileDataInternet(gl
 	res = collectFromAPI(water.str());
 	//parseData(res, location, data);
 
-	//// Building request string...
-	//std::stringstream road;
-	//road << "data=%5Bbbox%3A" << std::fixed << std::setprecision(15) << location.x << "%2C" << location.y << "%2C" << location.z << "%2C" << location.w << "%5D%3B%0Anwr%20%5B%22highway%22%5D%3B%0Aout%20geom%3B";
+	/*// Building request string...
+	std::stringstream road;
+	road << "data=%5Bbbox%3A" << std::fixed << std::setprecision(15) << location.x << "%2C" << location.y << "%2C" << location.z << "%2C" << location.w << "%5D%3B%0Anwr%20%5B%22highway%22%5D%3B%0Aout%20geom%3B";
 
-	//// Parsing roads
-	//res = collectFromAPI(road.str());
+	// Parsing roads
+	res = collectFromAPI(road.str());*/
 	return parseData(res, location, data);
 }
 
 static std::shared_ptr<tileBuilder::tileData> parseData(std::string& incoming, glm::vec4 location, std::shared_ptr<tileBuilder::tileData> data) {
 	std::cout << incoming << std::endl;
+
+	if (incoming.length() == 0 || incoming.length() == 711) {
+		return nullptr;
+	}
 
 	// Parsing response data
 	rapidxml::xml_document<> doc;
@@ -87,6 +98,9 @@ static std::shared_ptr<tileBuilder::tileData> parseData(std::string& incoming, g
 
 	// Find our root node
 	rapidxml::xml_node<>* root_node = doc.first_node("osm");
+	if (root_node == nullptr) {
+		return nullptr;
+	}
 
 	// Looping through the data on the way manner
 	for (rapidxml::xml_node<>* perimter_node = root_node->first_node("way"); perimter_node; perimter_node = perimter_node->next_sibling())
@@ -108,7 +122,7 @@ static std::shared_ptr<tileBuilder::tileData> parseData(std::string& incoming, g
 
 				// If it is not in the list then
 				if (created) {
-					zone = std::make_shared<tileBuilder::tileData>();
+					zone = std::make_shared<tileBuilder::tileZone>();
 					zone->type = checkZoneType(tag_node);
 				}
 				
@@ -157,7 +171,7 @@ static std::shared_ptr<tileBuilder::tileData> parseData(std::string& incoming, g
 
 				// If it is not in the list then
 				if (created) {
-					zone = std::make_shared<tileBuilder::tileData>();
+					zone = std::make_shared<tileBuilder::tileZone>();
 					zone->type = checkZoneType(tag_node);
 				}
 

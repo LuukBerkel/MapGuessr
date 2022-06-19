@@ -1,5 +1,6 @@
 #include "fpsCamera.h"
 #include <GLFW/glfw3.h>
+#include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
 
 fpsCamera::fpsCamera(GLFWwindow* window)
@@ -23,6 +24,7 @@ void fpsCamera::move(float angle, float fac)
 {
 	position.x += (float)cos(rotation.y + glm::radians(angle)) * fac;
 	position.z += (float)sin(rotation.y + glm::radians(angle)) * fac;
+	std::cout << position.x << " " << position.z << std::endl;
 }
 
 

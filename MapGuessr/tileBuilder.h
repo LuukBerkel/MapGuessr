@@ -2,8 +2,12 @@
  
 #include <glm/glm.hpp>
 #include <vector>
+#include <map>
+#include <mutex>
 #include <memory>
 #include "gameTile.h"
+
+
 
 class tileCollector;
 
@@ -37,11 +41,11 @@ public:
 	};
 
 	tileBuilder();
-
+	std::shared_ptr<gameTile> collectTile(glm::vec4 location);
 private:
 	tileCollector* collector;
 
-	std::shared_ptr<gameTile> collectTile(glm::vec4 location);
+	
 
 	void collectTileAsync(glm::vec4 location, std::shared_ptr<gameTile> tile);
 
@@ -52,5 +56,7 @@ private:
 	void addCache(std::shared_ptr<gameTile> tile);
 
 };
+
+
 
 

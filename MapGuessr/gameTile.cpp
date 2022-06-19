@@ -1,5 +1,6 @@
 #include "gameTile.h"
 #include <glm/gtc/matrix_transform.hpp>
+#include "tigl.h"
 
 gameTile::gameTile()
 {
@@ -26,8 +27,12 @@ void gameTile::draw()
 	glm::mat4 modelMatrix = relativePos;
 	modelMatrix = glm::translate(modelMatrix, gamePosition);
 
+	tigl::shader->setModelMatrix(modelMatrix);
+
+
 	// Drawing objects.
 	for (auto& object : gameObjects) {
+		if (object != nullptr)
 		object->draw(modelMatrix);
 	}
 }
@@ -35,6 +40,7 @@ void gameTile::draw()
 void gameTile::update(float elapsedTime)
 {
 	for (auto& object : gameObjects) {
+		if (object != nullptr)
 		object->update(elapsedTime);
 	}
 }

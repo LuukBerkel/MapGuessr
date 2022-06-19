@@ -3,10 +3,6 @@
 #include "triangulate.h"
 
 
-static float pow(float input) {
-	return input * input;
-}
-
 static glm::vec4 collectColor(tileBuilder::zoneType type) {
 	if (type == tileBuilder::zoneType::COMMERCIAL || type == tileBuilder::zoneType::HOMES) {
 		return glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
@@ -51,26 +47,30 @@ static float collectOfsett(tileBuilder::zoneType type) {
 	return 0;
 }
 
-floorComponent::floorComponent(tileBuilder::tileZone zones)
+floorComponent::floorComponent(std::shared_ptr<tileBuilder::tileZone> zones)
 {
 	// Setting color for vertices
-	glm::vec4 color= collectColor(zones.type);
-	float ofsett = collectOfsett(zones.type);
+	glm::vec4 color= collectColor(zones->type);
+	float ofsett = collectOfsett(zones->type);
 
-	Vector2dVector a;
-	for (glm::vec2 v : zones.perimeter) {
-		a.push_back(Vector2d(v.x, v.y));
-	}
+	// Creating all vertices and pushing them in a buffer.
+	for (std::vector<glm::vec2> ve : zones->perimeter) {
+		Vector2dVector a;
 
-	// allocate an STL vector to hold the answer.
-	Vector2dVector result;
+		for (glm::vec2 v : ve) {
+			a.push_back(Vector2d(v.x, v.y));
+		}
 
-	//  Invoke the triangulator to triangulate this polygon.
-	Triangulate::Process(a, result);
-	
-	for (Vector2d vec : result)
-	{
-		vertices.push_back(tigl::Vertex::PCN(glm::vec3(vec.GetX(), FLOOR_HEIGHT + ofsett, vec.GetY()), color, glm::vec3(0,1,0)));
+		// allocate an STL vector to hold the answer.
+		Vector2dVector result;
+
+		//  Invoke the triangulator to triangulate this polygon.
+		Triangulate::Process(a, result);
+
+		for (Vector2d vec : result)
+		{
+			vertices.push_back(tigl::Vertex::PCN(glm::vec3(vec.GetX(), FLOOR_HEIGHT + ofsett, vec.GetY()), color, glm::vec3(0, 1, 0)));
+		}
 	}
 }
 

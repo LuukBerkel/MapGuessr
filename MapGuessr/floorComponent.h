@@ -9,7 +9,7 @@ class floorComponent : public drawComponent {
 private:
 	std::vector<tigl::Vertex> vertices;
 public:
-	floorComponent(tileBuilder::tileZone zone);
+	floorComponent(std::shared_ptr<tileBuilder::tileZone> zones);
 	~floorComponent();
 
 	virtual void draw() override;

@@ -37,7 +37,7 @@ void gameObject::draw(const glm::mat4& parentMatrix)
 	modelMatrix = glm::rotate(modelMatrix, rotation.z, glm::vec3(0, 0, 1));
 	modelMatrix = glm::scale(modelMatrix, scale);
 
-	tigl::shader->setModelMatrix(modelMatrix);
+	/*tigl::shader->setModelMatrix(modelMatrix);*/
 
 	for (auto& c : components) {
 		std::shared_ptr<drawComponent> dc = dynamic_pointer_cast<drawComponent>(c);

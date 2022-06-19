@@ -10,12 +10,14 @@
 
 #include "objectComponent.h"
 #include "tileCollector.h"
+#include "gameScene.h"
+
 using tigl::Vertex;
 
 GLFWwindow* window;
-fpsCamera* camera;
-gameObject* object;
-
+std::shared_ptr<fpsCamera> camera;
+std::shared_ptr<gameScene> scene;
+float lastFrameTime;
 
 void init()
 {
@@ -25,7 +27,8 @@ void init()
 			if (key == GLFW_KEY_ESCAPE)
 				glfwSetWindowShouldClose(window, true);
 		});
-	camera = new fpsCamera(window);
+	camera = std::make_shared<fpsCamera>(window);
+	scene = std::make_shared<gameScene>(camera);
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
@@ -44,7 +47,12 @@ void init()
 
 void update()
 {
-	
+	double currentFrameTime = glfwGetTime();
+	double deltaTime = currentFrameTime - lastFrameTime;
+	lastFrameTime = currentFrameTime;
+
+	// Updating scene.
+	scene->update(deltaTime);
 }
 
 void draw()
@@ -63,6 +71,8 @@ void draw()
 	tigl::shader->enableColor(true);
 
 	glEnable(GL_DEPTH_TEST);
+
+	scene->draw();
 
 }
 
