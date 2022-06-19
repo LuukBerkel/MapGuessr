@@ -1,9 +1,14 @@
 #include "gameTile.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include "tigl.h"
+#include "floorComponent.h"
 
 gameTile::gameTile()
 {
+	vertices.push_back(tigl::Vertex::PCN(glm::vec3(0, FLOOR_HEIGHT -0.03, 0), glm::vec4(0.76, 0.69, 0.5, 1.0f ), glm::vec3(1, 0, 1)));
+	vertices.push_back(tigl::Vertex::PCN(glm::vec3(-1, FLOOR_HEIGHT - 0.03, 0), glm::vec4(0.76, 0.69, 0.5, 1.0f), glm::vec3(1, 0, 1)));
+	vertices.push_back(tigl::Vertex::PCN(glm::vec3(-1, FLOOR_HEIGHT - 0.03, -1), glm::vec4(0.76, 0.69, 0.5, 1.0f), glm::vec3(1, 0, 1)));
+	vertices.push_back(tigl::Vertex::PCN(glm::vec3(0, FLOOR_HEIGHT - 0.03, -1), glm::vec4(0.76, 0.69, 0.5, 1.0f), glm::vec3(1, 0, 1)));
 }
 
 gameTile::~gameTile()
@@ -28,6 +33,8 @@ void gameTile::draw()
 	modelMatrix = glm::translate(modelMatrix, gamePosition);
 
 	tigl::shader->setModelMatrix(modelMatrix);
+
+	tigl::drawVertices(GL_QUADS, vertices);
 
 
 	// Drawing objects.

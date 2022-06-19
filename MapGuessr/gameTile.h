@@ -4,10 +4,12 @@
 #include <memory>
 #include "gameObject.h"
 #include <vector>
+#include "tigl.h"
 
 class gameTile {
 private:
 	std::list<std::shared_ptr<gameObject>> gameObjects;
+	std::vector<tigl::Vertex> vertices;
 public:
 	// Position in the game
 	glm::vec3 gamePosition;

@@ -67,9 +67,44 @@ floorComponent::floorComponent(std::shared_ptr<tileBuilder::tileZone> zones)
 		//  Invoke the triangulator to triangulate this polygon.
 		Triangulate::Process(a, result);
 
-		for (Vector2d vec : result)
-		{
-			vertices.push_back(tigl::Vertex::PCN(glm::vec3(vec.GetX(), FLOOR_HEIGHT + ofsett, vec.GetY()), color, glm::vec3(0, 1, 0)));
+		
+		srand(time(NULL));
+
+		if (zones->type == tileBuilder::zoneType::COMMERCIAL || zones->type == tileBuilder::zoneType::HOMES) {
+			float height = 0.1;
+
+			// Creating buildings
+			if (ve.size() > 1) {
+				int j = 1;
+				for (size_t i = 0; i < ve.size(); i++)
+				{
+					// Drawing squares....
+					vertices.push_back(tigl::Vertex::PCN(glm::vec3(ve[i].x, FLOOR_HEIGHT, ve[i].y), color, glm::vec3(1, 0, 1)));
+					vertices.push_back(tigl::Vertex::PCN(glm::vec3(ve[j].x, FLOOR_HEIGHT, ve[j].y), color, glm::vec3(1, 0, 1)));
+					vertices.push_back(tigl::Vertex::PCN(glm::vec3(ve[i].x, FLOOR_HEIGHT + height, ve[i].y), color, glm::vec3(1, 0, 1)));
+
+					vertices.push_back(tigl::Vertex::PCN(glm::vec3(ve[i].x, FLOOR_HEIGHT + height, ve[i].y), color, glm::vec3(1, 0, 1)));
+					vertices.push_back(tigl::Vertex::PCN(glm::vec3(ve[j].x, FLOOR_HEIGHT + height, ve[j].y), color, glm::vec3(1, 0, 1)));
+					vertices.push_back(tigl::Vertex::PCN(glm::vec3(ve[j].x, FLOOR_HEIGHT, ve[j].y), color, glm::vec3(1, 0, 1)));
+
+					j++;
+					if (j >= ve.size()) j = 0;
+				}
+			}
+
+			// Adding in result
+			for (Vector2d vec : result)
+			{
+				vertices.push_back(tigl::Vertex::PCN(glm::vec3(vec.GetX(), FLOOR_HEIGHT + height, vec.GetY()), color, glm::vec3(0, 1, 0)));
+			}
+		}
+		else {
+
+			// Adding in result
+			for (Vector2d vec : result)
+			{
+				vertices.push_back(tigl::Vertex::PCN(glm::vec3(vec.GetX(), FLOOR_HEIGHT + ofsett, vec.GetY()), color, glm::vec3(0, 1, 0)));
+			}
 		}
 	}
 }
