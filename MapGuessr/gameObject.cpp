@@ -56,4 +56,6 @@ void gameObject::draw(const glm::mat4& parentMatrix)
 
 void gameObject::update(float elapsedTime)
 {
+	for (auto& c : components)
+		c->update(elapsedTime);
 }

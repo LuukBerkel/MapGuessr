@@ -1,13 +1,46 @@
 #include "gameScene.h"
 #include <cmath>
+#include "objectComponent.h"
+#include "playerComponent.h"
+#include "rotateComponent.h"
 
 gameScene::gameScene(std::shared_ptr<fpsCamera> c)
 {
+	// Setting up builder and camera...
 	builder = tileBuilder();
 	cam = c;
-	
 
-	gameTiles[1][1] = builder.collectTile(glm::vec4 (worldStartingPoint.x -0.005f, worldStartingPoint.y - 0.005f, worldStartingPoint.x + 0.005f, worldStartingPoint.y + 0.005f));
+	// Adding simple object files...
+	// Adding a helicopter
+	std::shared_ptr <gameObject> heli = std::make_shared<gameObject>();
+	heli->addComponent(std::make_shared<objectComponent>("resources/chopper/chopper.obj"));
+	heli->addComponent(std::make_shared<playerComponent>(cam, heli, glm::vec3(0, -0.5f, -20)));
+	heli->scale = glm::vec3(0.01f);
+	gameObjects.push_back(heli);
+
+
+	// Adding some clouds
+	std::shared_ptr <gameObject> cloud0 = std::make_shared<gameObject>();
+	cloud0->addComponent(std::make_shared<objectComponent>("resources/cloud/cloud.obj"));
+	cloud0->addComponent(std::make_shared<playerComponent>(cam, cloud0, glm::vec3(-30, -0.5f, -30)));
+	cloud0->addComponent(std::make_shared<rotateComponent>(cloud0, 0.67f));
+	cloud0->scale = glm::vec3(0.005f);
+	gameObjects.push_back(cloud0);
+
+	std::shared_ptr <gameObject> cloud1 = std::make_shared<gameObject>();
+	cloud1->addComponent(std::make_shared<objectComponent>("resources/cloud/cloud.obj"));
+	cloud1->addComponent(std::make_shared<playerComponent>(cam, cloud1, glm::vec3(25, -0.5f, -25)));
+	cloud1->addComponent(std::make_shared<rotateComponent>(cloud1, 0.61f));
+	cloud1->scale = glm::vec3(0.007f);
+	gameObjects.push_back(cloud1);
+
+	std::shared_ptr <gameObject> cloud2 = std::make_shared<gameObject>();
+	cloud2->addComponent(std::make_shared<objectComponent>("resources/cloud/cloud.obj"));
+	cloud2->addComponent(std::make_shared<playerComponent>(cam, cloud2, glm::vec3(10, -0.5f, -40)));
+	cloud2->addComponent(std::make_shared<rotateComponent>(cloud2, 0.61f));
+	cloud2->scale = glm::vec3(0.003f);
+	gameObjects.push_back(cloud2);
+
 }
 
 static float pow(float input) {
