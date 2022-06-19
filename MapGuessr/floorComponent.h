@@ -3,7 +3,7 @@
 #include "tileBuilder.h"
 #include "tigl.h"
 
-#define FLOOR_HEIGHT -1.0f
+#define FLOOR_HEIGHT -0.2f
 
 class floorComponent : public drawComponent {
 private:

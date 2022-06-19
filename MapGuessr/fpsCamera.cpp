@@ -24,7 +24,7 @@ void fpsCamera::move(float angle, float fac)
 {
 	position.x += (float)cos(rotation.y + glm::radians(angle)) * fac;
 	position.z += (float)sin(rotation.y + glm::radians(angle)) * fac;
-	std::cout << position.x << " " << position.z << std::endl;
+	//std::cout << position.x << " " << position.z << std::endl;
 }
 
 
@@ -44,11 +44,11 @@ void fpsCamera::update(GLFWwindow* window)
 
 
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		move(0, 0.1f);
+		move(0, 0.01f);
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		move(180, 0.1f);
+		move(180, 0.01f);
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		move(90, 0.1f);
+		move(90, 0.01f);
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		move(-90, 0.1f);
+		move(-90, 0.01f);
 }

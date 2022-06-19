@@ -33,20 +33,18 @@ void gameScene::draw()
 		}
 	}
 
-	gameTiles[1][1]->draw();
-
 	for (std::shared_ptr<gameObject> tile : gameObjects) {
 		tile->draw();
 	}
 }
 
-void gameScene::changedWorldIndex(glm::uvec2 worldIndex) {
+void gameScene::changedWorldIndex(glm::vec2 worldIndex) {
 	for (size_t i = 0; i < viewDistance; i++)
 	{
 		for (size_t j = 0; j < viewDistance; j++)
 		{
-			float ofsettX = -0.01 + (i * 0.01);
-			float ofsettY = -0.01 + (j * 0.01);
+			float ofsettX = -0.01f +  (i * 0.01);
+			float ofsettY = -0.01f + (j * 0.01);
 			glm::vec4 pos(
 				worldStartingPoint.x + (worldIndex.x * 0.01) + ofsettX - 0.005, 
 				worldStartingPoint.y + (worldIndex.y * 0.01) + ofsettY - 0.005, 
@@ -54,7 +52,7 @@ void gameScene::changedWorldIndex(glm::uvec2 worldIndex) {
 				worldStartingPoint.y + (worldIndex.y * 0.01) + ofsettY + 0.005);
 
 			gameTiles[i][j] = builder.collectTile(pos);
-			gameTiles[i][j]->gamePosition = glm::vec3(i - 1 + worldIndex.x, 0, j - 1 + worldIndex.y);
+			gameTiles[i][j]->gamePosition = glm::vec3(i - (viewDistance/2) + worldIndex.x, 0, j - (viewDistance/2) + worldIndex.y);
 		}
 	}
 }
@@ -62,7 +60,7 @@ void gameScene::changedWorldIndex(glm::uvec2 worldIndex) {
 
 void gameScene::update(float elapsedTime)
 {
-	glm::vec2 location = glm::vec2(worldStartingPoint.x - (cam->position.x / 100.0f), (worldStartingPoint.y - cam->position.y / 100.0f));
+	glm::vec2 location = glm::vec2(worldStartingPoint.x - (cam->position.x / 100.0f), (worldStartingPoint.y - cam->position.z / 100.0f));
 
 	float xDelta = location.x - worldStartingPoint.x;
 	float yDelta = location.y - worldStartingPoint.y;
@@ -71,10 +69,11 @@ void gameScene::update(float elapsedTime)
 	float yIndex = yDelta / 0.01;
 
 	// Updating world index;
-	if (worldIndexing != glm::uvec2((int)xIndex, (int)yIndex)) {
-		changedWorldIndex(glm::uvec2((int)xIndex, (int)yIndex));
-		worldIndexing = glm::uvec2((int)xIndex, (int)yIndex);
+	if (worldIndexing != glm::vec2((int)xIndex, (int)yIndex)) {
+		changedWorldIndex(glm::vec2((int)xIndex, (int)yIndex));
+		worldIndexing = glm::vec2((int)xIndex, (int)yIndex);
 	}
+
 
 	for (size_t i = 0; i < viewDistance; i++)
 	{
@@ -82,6 +81,9 @@ void gameScene::update(float elapsedTime)
 		{
 			if (gameTiles[i][j] != nullptr)
 			gameTiles[i][j]->update(elapsedTime);
+			else {
+				std::cout << i << " " << j << std::endl;
+			}
 		}
 	}
 

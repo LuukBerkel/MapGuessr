@@ -33,14 +33,17 @@ void init()
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	tigl::shader->enableFog(true);
 	tigl::shader->enableLighting(true);
 	tigl::shader->setLightCount(1);
 	tigl::shader->setLightDirectional(0, true);
-	tigl::shader->setLightPosition(0, (glm::vec3(0, 7, 12)));
+	tigl::shader->setLightPosition(0, (glm::vec3(0, -1, 0)));
 	tigl::shader->setLightAmbient(0, glm::vec3(0.5f, 0.5f, 0.5f));
 	tigl::shader->setLightDiffuse(0, glm::vec3(0.5f, 0.5f, 0.5f));
 	tigl::shader->setLightSpecular(0, glm::vec3(1, 1, 1));
-	tigl::shader->setShinyness(0);
+	tigl::shader->setFogColor(glm::vec3(0.3f, 0.4f, 0.6f));
+	tigl::shader->setFogLinear(0 , 1);
+	tigl::shader->setShinyness(0.3f);
 
 
 }

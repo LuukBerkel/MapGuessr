@@ -74,19 +74,13 @@ std::shared_ptr<tileBuilder::tileData> tileCollector::collectTileDataInternet(gl
 	
 	// Parsing water
 	res = collectFromAPI(water.str());
-	//parseData(res, location, data);
+	parseData(res, location, data);
 
-	/*// Building request string...
-	std::stringstream road;
-	road << "data=%5Bbbox%3A" << std::fixed << std::setprecision(15) << location.x << "%2C" << location.y << "%2C" << location.z << "%2C" << location.w << "%5D%3B%0Anwr%20%5B%22highway%22%5D%3B%0Aout%20geom%3B";
-
-	// Parsing roads
-	res = collectFromAPI(road.str());*/
-	return parseData(res, location, data);
+	std::cout << "Parsed tile with specs: " << location.x << ", " << location.y << "; It also has " << data->data.size() << "areas with a size in bytes of " << sizeof(data) << std::endl;
+	return data;
 }
 
 static std::shared_ptr<tileBuilder::tileData> parseData(std::string& incoming, glm::vec4 location, std::shared_ptr<tileBuilder::tileData> data) {
-	std::cout << incoming << std::endl;
 
 	if (incoming.length() == 0 || incoming.length() == 711) {
 		return nullptr;
@@ -139,7 +133,7 @@ static std::shared_ptr<tileBuilder::tileData> parseData(std::string& incoming, g
 				if (coord_node->first_attribute("lat") != nullptr || coord_node->first_attribute("lon") != nullptr) {
 					float lat = (location.x - std::stof(coord_node->first_attribute("lat")->value()));
 					float lon =	(location.y - std::stof(coord_node->first_attribute("lon")->value()));
-					if (lat < 0 && lat > (location.x - location.z) && lon < 0 && lon > (location.y - location.w)) {
+					if (lat < 0 && lat > (location.x - location.z) && lon < 0 && lon > (location.y - location.w) || zone->type == tileBuilder::zoneType::WATER) {
 						lat *= 100;
 						lon *= 100;
 						coordinates.push_back(glm::vec2(lat, lon));
@@ -189,7 +183,7 @@ static std::shared_ptr<tileBuilder::tileData> parseData(std::string& incoming, g
 					if (coord_node->first_attribute("lat") != nullptr || coord_node->first_attribute("lon") != nullptr) {
 						float lat = (location.x - std::stof(coord_node->first_attribute("lat")->value()));
 						float lon = (location.y - std::stof(coord_node->first_attribute("lon")->value()));
-						if (lat < 0 && lat >(location.x - location.z) && lon < 0 && lon >(location.y - location.w)) {
+						if (lat < 0 && lat >(location.x - location.z) && lon < 0 && lon >(location.y - location.w) || zone->type == tileBuilder::zoneType::WATER) {
 							lat *= 100;
 							lon *= 100;
 							coordinates.push_back(glm::vec2(lat, lon));
