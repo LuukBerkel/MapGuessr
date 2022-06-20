@@ -8,6 +8,9 @@
 #include <limits>
 #include <string.h> 
 #include <mutex>
+#include <fstream>
+#include <algorithm>
+#include "floorComponent.h"
 
 #define ERROR_MESSAGE_LENGTH 593
 
@@ -199,7 +202,7 @@ static std::shared_ptr<tileBuilder::tileData> parseData(std::string& incoming, g
 	return data;
 }
 
-static tileBuilder::zoneType checkZoneType(rapidxml::xml_node<>* tag_node) {
+tileBuilder::zoneType checkZoneType(rapidxml::xml_node<>* tag_node) {
 	std::string value = std::string(tag_node->first_attribute("v")->value());
 	std::string key = std::string(tag_node->first_attribute("k")->value());
 	// First degree
@@ -228,19 +231,128 @@ static tileBuilder::zoneType checkZoneType(rapidxml::xml_node<>* tag_node) {
 	return tileBuilder::zoneType::EMPTY;
 }
 
+/**
+* Splits a string into substrings, based on a seperator
+*/
+std::vector<std::string> split(std::string str, const std::string& seperator)
+{
+	std::vector<std::string> ret;
+	size_t index;
+	while (true)
+	{
+		index = str.find(seperator);
+		if (index == std::string::npos)
+			break;
+		ret.push_back(str.substr(0, index));
+		str = str.substr(index + 1);
+	}
+	ret.push_back(str);
+	return ret;
+}
+
 std::shared_ptr<gameTile> tileCollector::collectGameTileChache(glm::vec4& location)
 {
+	// Creating filename
+	std::stringstream filename;
+	filename << location.x << "_" << location.y << "_" << location.z << "_" << location.w;
+	std::string result = filename.str();
 
 
+	// Using algortim for removing data..
+	result.erase(std::remove_if(result.begin(), result.end(), [](char c) { return c == '.'; }));
+	std::ifstream file(result + ".txt");
 
-	return std::shared_ptr<gameTile>();
+	// Reading using factory pattern...
+	std::shared_ptr<gameTile> tile = nullptr;
+	std::shared_ptr<floorComponent> component = nullptr;
+	while (!file.eof())
+	{
+		std::string line;
+		std::getline(file, line);
+
+		std::vector<std::string> params = split(line, " ");
+	
+
+		if (params[0] == "boundries") {
+			tile = std::make_shared<gameTile>(glm::vec4((float)atof(params[1].c_str()), (float)atof(params[2].c_str()), (float)atof(params[3].c_str()), (float)atof(params[4].c_str())));
+		}
+		else if (params[0] == "floor") {
+			if (tile != nullptr) {
+				component = std::make_shared<floorComponent>();
+				std::shared_ptr<gameObject> obj = std::make_shared<gameObject>();
+				obj->addComponent(component);
+				obj->position = glm::vec3(0, 0, 0);
+				tile->addObject(obj);
+			}
+		}
+		else if (params[0] == "v") {
+			if (component != nullptr) {
+				component->vertices.push_back(tigl::Vertex::PCN(glm::vec3((float)atof(params[1].c_str()), (float)atof(params[2].c_str()), (float)atof(params[3].c_str())),
+					glm::vec4((float)atof(params[4].c_str()), (float)atof(params[5].c_str()), (float)atof(params[6].c_str()), (float)atof(params[7].c_str())),
+					glm::vec3((float)atof(params[8].c_str()), (float)atof(params[9].c_str()), (float)atof(params[10].c_str()))));
+			}
+		}
+	}
+
+	std::cout << "Loaded " << result << ".txt" <<"from hdd cache" << std::endl;
+
+	return tile;
 }
 
 bool tileCollector::checkGameTileChache(glm::vec4& location)
 {
-	return false;
+	// Creating filename
+	std::stringstream filename;
+	filename << location.x << "_" << location.y << "_" << location.z << "_" << location.w;
+	std::string result = filename.str();
+
+
+	// Using algortim for removing data..
+	result.erase(std::remove_if(result.begin(), result.end(), [](char c) { return c == '.'; }));
+	std::ifstream file(result + ".txt");
+
+	// Checking if it open.
+	if (!file.is_open())
+	{
+		std::cout << "Could not open file " << result << ".txt" << std::endl;
+		return false;
+	}
+
+	file.close();
+	return true;
 }
 
 void tileCollector::writeGameTileTooCache(std::shared_ptr<gameTile> tile)
 {
+	// Creating filename
+	std::stringstream filename;
+	filename  << tile->boundries.x << "_" << tile->boundries.y << "_" << tile->boundries.z << "_" << tile->boundries.w;
+	std::string result = filename.str();
+	
+
+	// Using algortim for removing data..
+	result .erase(std::remove_if(result.begin(), result.end(), [](char c) { return c == '.'; } ));
+
+	// Added an item to cache..
+	std::cout << "Added " << result << ".txt to hdd cache" << std::endl;
+
+	// Create and open a text file
+	std::ofstream file(result + ".txt");
+
+	// Write to the file
+	file << "boundries " << tile->boundries.x << " " << tile->boundries.y << " " << tile->boundries.z << " " << tile->boundries.w << std::endl;
+	for (std::shared_ptr<gameObject> object : tile->gameObjects) {
+		std::shared_ptr<floorComponent> c = object->getComponent<floorComponent>();
+		if (c != nullptr) {
+			file << "floor" << std::endl;
+			for (tigl::Vertex vert : c->vertices) {
+				file << "v " << vert.position.x << " " << vert.position.y << " " << vert.position.z								// Position
+					<< " " << vert.color.x << " " << vert.color.y << " " << vert.color.z << " " << vert.color.w					// Color
+					<< " " << vert.normal.x << " " << vert.normal.y << " " << vert.normal.z << std::endl;						// Normal
+			}
+		}
+	}
+
+	// Close the file
+	file.close();
 }

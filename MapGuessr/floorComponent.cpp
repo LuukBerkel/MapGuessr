@@ -109,6 +109,10 @@ floorComponent::floorComponent(std::shared_ptr<tileBuilder::tileZone> zones)
 	}
 }
 
+floorComponent::floorComponent()
+{
+}
+
 floorComponent::~floorComponent()
 {
 }

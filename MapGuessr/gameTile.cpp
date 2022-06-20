@@ -3,8 +3,9 @@
 #include "tigl.h"
 #include "floorComponent.h"
 
-gameTile::gameTile()
+gameTile::gameTile(glm::vec4 boundries)
 {
+	this->boundries = boundries;
 	vertices.push_back(tigl::Vertex::PCN(glm::vec3(0, FLOOR_HEIGHT -0.002, 0), glm::vec4(0.76, 0.69, 0.5, 1.0f ), glm::vec3(1, 0, 1)));
 	vertices.push_back(tigl::Vertex::PCN(glm::vec3(-1, FLOOR_HEIGHT - 0.002, 0), glm::vec4(0.76, 0.69, 0.5, 1.0f), glm::vec3(1, 0, 1)));
 	vertices.push_back(tigl::Vertex::PCN(glm::vec3(-1, FLOOR_HEIGHT - 0.002, -1), glm::vec4(0.76, 0.69, 0.5, 1.0f), glm::vec3(1, 0, 1)));

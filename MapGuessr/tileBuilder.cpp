@@ -25,7 +25,7 @@ std::shared_ptr<gameTile> tileBuilder::collectTile(glm::vec4 location)
 	}
 
 	// Second option |-: we are going to check the hdd cache
-	std::shared_ptr<gameTile> tile = std::make_shared<gameTile>();
+	std::shared_ptr<gameTile> tile = std::make_shared<gameTile>(location);
 	std::vector<float> locations = {location.x, location.y, location.z, location.w};
 	
 	cachedTiles.emplace(locations, tile );
@@ -68,7 +68,7 @@ void tileBuilder::collectTileAsync(glm::vec4 location, std::shared_ptr<gameTile>
 
 	// Setting gameposition
 	tile->addObjects(objects);
-	tile->worldPosition = location;
+	tile->boundries = location;
 
 	// Adding item to cache
 	addCache(tile);
@@ -86,7 +86,8 @@ bool tileBuilder::checkCache(glm::vec4 location)
 
 void tileBuilder::collectCacheAsync(glm::vec4 location, std::shared_ptr<gameTile> tile)
 {
-	tile = collector->collectGameTileChache(location);
+	tile->gameObjects = collector->collectGameTileChache(location)->gameObjects;
+	tile->boundries = location;
 }
 
 void tileBuilder::addCache(std::shared_ptr<gameTile> tile)

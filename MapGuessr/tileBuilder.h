@@ -15,15 +15,15 @@ class tileBuilder {
 public:
 	// This holds the differend terraintypes available to render
 	enum class zoneType {
-		GRASS,
-		HOMES,
-		INDUSTRIAL,
-		FOREST,
-		WATER,
-		COMMERCIAL,
-		FOODPROD,
-		ROAD,
-		EMPTY
+		GRASS = 1,
+		HOMES= 2,
+		INDUSTRIAL= 3,
+		FOREST= 4,
+		WATER= 5,
+		COMMERCIAL= 6,
+		FOODPROD= 7,
+		ROAD= 8,
+		EMPTY= 9
 	};
 
 	// Holds a area with terrain type.

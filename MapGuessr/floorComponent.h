@@ -6,10 +6,11 @@
 #define FLOOR_HEIGHT -0.2f
 
 class floorComponent : public drawComponent {
-private:
-	std::vector<tigl::Vertex> vertices;
 public:
+	std::vector<tigl::Vertex> vertices;
+
 	floorComponent(std::shared_ptr<tileBuilder::tileZone> zones);
+	floorComponent();
 	~floorComponent();
 
 	virtual void draw() override;

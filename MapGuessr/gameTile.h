@@ -8,15 +8,16 @@
 
 class gameTile {
 private:
-	std::list<std::shared_ptr<gameObject>> gameObjects;
 	std::vector<tigl::Vertex> vertices;
 public:
 	// Position in the game
 	glm::vec3 gamePosition;
-	glm::vec3 worldPosition;
+	glm::vec4 boundries;
+
+	std::list<std::shared_ptr<gameObject>> gameObjects;
 
 	// For setting objects
-	gameTile();
+	gameTile(glm::vec4 boundries);
 	~gameTile();
 
 	// For adding extra objects

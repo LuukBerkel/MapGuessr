@@ -7,6 +7,7 @@ class gameComponent  {
 private:
 	gameObject* owner;
 public : 
+
 	/**
 	 * @brief Interface for the update method for component
 	 * 
