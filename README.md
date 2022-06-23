@@ -11,4 +11,4 @@ Though there is a lot of work to in improving it. For example there is still the
 The application parses the data from the API as is earlier stated but also caches this data. First it caches it in RAM in runtime. But it also caches the downloaded tiles on the SSD or HDD depending on the location of the program.
 
 You can see this in the image below. 
-![screen](LoadingViewer.png)
+![screen](LoadingView.png)
